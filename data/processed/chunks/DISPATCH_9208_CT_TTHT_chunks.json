@@ -1,0 +1,47 @@
+{
+  "document_id": "DISPATCH_9208_CT_TTHT",
+  "source_file": "data/processed/structured_documents/DISPATCH_9208_CT_TTHT.json",
+  "source_parse_status": "NO_ARTICLE_FOUND",
+  "chunked_at": "2026-06-08T12:03:18",
+  "chunk_count": 1,
+  "max_chars_per_chunk": 1800,
+  "min_chars_per_chunk": 300,
+  "paragraph_overlap": 0,
+  "chunks": [
+    {
+      "chunk_id": "DISPATCH_9208_CT_TTHT_PARAGRAPH_CHUNK_001",
+      "document_id": "DISPATCH_9208_CT_TTHT",
+      "chunk_type": "paragraph_group",
+      "text": "TỔNG CỤC THUẾ\nCỤC THUẾ TP HỒ CHÍ MINH\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 9208/CT-TTHT\nV/v: Hóa đơn, chứng từ\nThành phố Hồ Chí Minh, ngày 22 tháng 09 năm 2017\nKính gửi: Công ty TNHH Super Dry (Việt Nam)\nĐịa chỉ: A3 Khu biệt thự Sông Ông Lớn, Nguyễn Văn Linh, xã Bình Hưng, H.Bình Chánh, TP.HCM Mã số thuế: 0313992440\nTrả lời văn bản số 1706001/2017 ngày 27/6/2017 của Công ty về hóa đơn, chứng từ; Cục Thuế TP có ý kiến như sau:\nCăn cứ Khoản 1 Điều 4 Thông tư số 39/2014/TT-BTC ngày 31/3/2014 của Bộ Tài chính hướng dẫn về hóa đơn bán hàng hóa, cung ứng dịch vụ quy định nội dung bắt buộc trên hóa đơn trên hóa đơn đã lập;\nCăn cứ Điểm a Khoản 2 Điều 5 Thông tư số 119/2014/TT-BTC ngày 25/8/2014 của Bộ Tài chính sửa đổi điểm g khoản 1 Điều 4 Thông tư số 39/2014/TT-BTC;\nCăn cứ Khoản 1 Điều 3 Thông tư số 26/2015/TT-BTC ngày 27/2/2015 của Bộ Tài chính sửa đổi điểm k Khoản 1 Điều 4 Thông tư số 39/2014/TT-BTC,\nCăn cứ quy định trên, tiêu thức “hình thức thanh toán” là nội dung không bắt buộc phải có trên hóa đơn. Trường hợp theo trình bày, Công ty khi lập hóa đơn giao cho khách hàng tại tiêu thức này có ghi: TM/CK, các nội dung bắt buộc khác lập đúng theo quy định thì hóa đơn vẫn hợp lệ để kê khai thuế.\nCục Thuế TP thông báo Công ty biết để thực hiện theo đúng quy định tại các văn bản quy phạm pháp luật đã được trích dẫn tại văn bản này.\nNơi nhận:\n- Như trên;\n- P.KT2;\n- P.PC;\n- Lưu VT; TTHT.\n1394_32664048 Chung 151890\nKT. CỤC TRƯỞNG\nPHÓ CỤC TRƯỞNG\nNguyễn Nam Bình\nDA",
+      "char_count": 1505,
+      "metadata": {
+        "document_id": "DISPATCH_9208_CT_TTHT",
+        "file_name": "9208-CT-TTHT.doc",
+        "title": "Công văn 9208/CT-TTHT về hóa đơn, chứng từ",
+        "document_number": "9208/CT-TTHT",
+        "document_type": "Công văn",
+        "issuing_authority": "Cục Thuế Thành phố Hồ Chí Minh",
+        "issue_date": "2017-09-22",
+        "effective_date": "2017-09-22",
+        "expiry_date": "",
+        "status": "effective",
+        "source_type": "official",
+        "source_url": "",
+        "local_path": "data/raw/official_dispatches/9208-CT-TTHT.doc",
+        "download_date": "2026-06-07",
+        "topics": "hóa đơn, chứng từ",
+        "version": 1,
+        "notes": "",
+        "document_name": "Công văn 9208/CT-TTHT về hóa đơn, chứng từ",
+        "chunk_index": 1,
+        "chunk_source_type": "dispatch",
+        "source_structure": "paragraphs",
+        "parse_status": "NO_ARTICLE_FOUND",
+        "paragraph_start": 1,
+        "paragraph_end": 26,
+        "paragraph_count": 25,
+        "overlap_paragraphs": 0
+      }
+    }
+  ]
+}

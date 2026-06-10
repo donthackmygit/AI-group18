@@ -1,0 +1,15 @@
+pandas
+openpyxl
+pymupdf
+pypdf
+python-docx
+numpy
+tqdm
+sentence-transformers
+torch
+python-dotenv
+psycopg[binary]
+pgvector
+fastapi
+uvicorn[standard]
+google-genai

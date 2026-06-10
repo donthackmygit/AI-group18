@@ -1,0 +1,11 @@
+{
+  "document_id": "DISPATCH_63646_CTHN_TTHT",
+  "source_file": "data/processed/structured_documents/DISPATCH_63646_CTHN_TTHT.json",
+  "source_parse_status": "EMPTY",
+  "chunked_at": "2026-06-08T12:03:18",
+  "chunk_count": 0,
+  "max_chars_per_chunk": 1800,
+  "min_chars_per_chunk": 300,
+  "paragraph_overlap": 0,
+  "chunks": []
+}

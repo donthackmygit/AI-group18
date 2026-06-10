@@ -1,0 +1,1 @@
+"""Query embedding pipeline step."""

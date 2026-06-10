@@ -1,0 +1,31 @@
+{
+  "document_id": "DISPATCH_63646_CTHN_TTHT",
+  "metadata": {
+    "document_id": "DISPATCH_63646_CTHN_TTHT",
+    "file_name": "63646-CTHN-TTHT.pdf",
+    "title": "Công văn 63646/CTHN-TTHT về miễn giảm thuế TNCN theo Hiệp định vận chuyển hàng không",
+    "document_number": "63646/CTHN-TTHT",
+    "document_type": "Công văn",
+    "issuing_authority": "Cục Thuế Thành phố Hà Nội",
+    "issue_date": "2023-08-30",
+    "effective_date": "2023-08-30",
+    "expiry_date": "",
+    "status": "effective",
+    "source_type": "official",
+    "source_url": "",
+    "local_path": "data/raw/official_dispatches/63646-CTHN-TTHT.pdf",
+    "download_date": "2026-06-07",
+    "topics": "thuế thu nhập cá nhân",
+    "version": 1,
+    "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf."
+  },
+  "parsed_at": "2026-06-08T11:59:41",
+  "parse_status": "EMPTY",
+  "article_count": 0,
+  "clause_count": 0,
+  "point_count": 0,
+  "paragraph_count": 0,
+  "preamble": "",
+  "articles": [],
+  "paragraphs": []
+}

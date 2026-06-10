@@ -1,0 +1,54 @@
+TỔNG CỤC THUẾ
+CỤC THUẾ TP HÀ NỘI
+CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+Độc lập - Tự do - Hạnh phúc
+Số: 388/CTHN-TTHT
+V/v chứng từ điện tử khấu trừ thuế TNCN
+Hà Nội, ngày 04 tháng 01 năm 2023
+Kính gửi: Công ty cổ phần đầu tư và thương mại CTM (Địa chỉ: Số 116 Cầu Diễn, Phường Phúc Diễn, Quận Bắc Từ Liêm, TP Hà Nội; MST: 0101581544)
+Trả lời công văn số 60.2022/CTM-TCKT của Công ty cổ phần đầu tư và thương mại CTM (sau đây gọi tắt là “Công ty”) hỏi về chứng từ điện tử khấu trừ thuế TNCN, Cục Thuế TP Hà Nội có ý kiến như sau:
+- Căn cứ Nghị định 123/2020/NĐ-CP ngày 19/10/2020 của Chính phủ quy định về hóa đơn, chứng từ:
++ Tại Khoản 2, Điều 4 quy định về nguyên tắc lập, quản lý, sử dụng hóa đơn, chứng từ:
+2. Khi khấu trừ thuế thu nhập cá nhân, khi thu thuế, phí, lệ phí, tổ chức khấu trừ thuế, tổ chức thu phí, lệ phí, tổ chức thu thuế phải lập chứng từ khấu trừ thuế, biên lai thu thuế, phí, lệ phí giao cho người có thu nhập bị khấu trừ thuế, người nộp thuế, nộp phí, lệ phí và phải ghi đầy đủ các nội dung theo quy định tại Điều 32 Nghị định này. Trường hợp sử dụng biên lai điện tử thì phải theo định dạng chuẩn dữ liệu của cơ quan thuế. Trường hợp cá nhân ủy quyền quyết toán thuế thì không cấp chứng từ khấu trừ thuế thu nhập cá nhân.
+Đối với cá nhân không ký hợp đồng lao động hoặc ký hợp đồng lao động dưới 03 tháng thì tổ chức, cá nhân trả thu nhập được lựa chọn cấp chứng từ khấu trừ thuế cho mỗi lần khấu trừ thuế hoặc cấp một chứng từ khấu trừ cho nhiều lần khấu trừ thuế trong một kỳ tính thuế. Đối với cá nhân ký hợp đồng lao động từ 03 tháng trở lên, tổ chức, cá nhân trả thu nhập chỉ cấp cho cá nhân một chứng từ khấu trừ thuế trong một kỳ tính thuế.
++ Tại Điều 30 quy định loại chứng từ:
+“Điều 30. Loại chứng từ
+1. Chứng từ trong lĩnh vực quản lý thuế, phí, lệ phí của cơ quan thuế bao gồm:
+a) Chứng từ khấu trừ thuế thu nhập cá nhân;
++ Tại Điều 31 quy định về thời điểm lập chứng từ:
+“Tại thời điểm khấu trừ thuế thu nhập cá nhân, thời điểm thu thuế, phí, lệ phí, tổ chức khấu trừ thuế thu nhập cá nhân, tổ chức thu thuế, phí, lệ phí phải lập chứng từ, biên lai giao cho người có thu nhập bị khấu trừ thuế, người nộp các khoản thuế, phí lệ phí.”
++ Tại Khoản 1 Điều 32 quy định về nội dung chứng từ:
+“1. Chứng từ khấu trừ thuế có các nội dung sau:
+đ) Khoản thu nhập, thời điểm trả thu nhập, tổng thu nhập chịu thuế, số thuế đã khấu trừ; số thu nhập còn được nhận;
+e) Ngày, tháng, năm lập chứng từ khấu trừ thuế;
+g) Họ tên, chữ ký của người trả thu nhập.
+Trường hợp sử dụng chứng từ khấu trừ thuế điện tử thì chữ ký trên chứng từ điện tử là chữ ký số.”
++ Tại Khoản 2 Điều 33 quy định về định dạng chứng từ điện tử khấu trừ thuế thu nhập cá nhân:
+2. Định dạng chứng từ điện tử khấu trừ thuế thu nhập cá nhân:
+Tổ chức khấu trừ thuế thu nhập cá nhân khi sử dụng chứng từ theo quy định tại điểm a khoản 1 Điều 30 Nghị định này theo hình thức điện tử tự xây dựng hệ thống phần mềm để sử dụng chứng từ điện tử đảm bảo các nội dung bắt buộc theo quy định tại khoản 1 Điều 32 Nghị định này.
+- Căn cứ Khoản 2 Điều 25 Thông tư số 111/2013/TT-BTC quy định về khấu trừ thuế và chứng từ khấu trừ thuế:
+“Điều 25. Khấu trừ thuế và chứng từ khấu trừ thuế
+2. Chứng từ khấu trừ
+a) Tổ chức, cá nhân trả các khoản thu nhập đã khấu trừ thuế theo hướng dẫn tại Khoản 1 Điều này phải cấp chứng từ khấu trừ thuế theo yêu cầu của cá nhân bị khấu trừ. Trường hợp cá nhân ủy quyền quyết toán thuế thì không cấp chứng từ khấu trừ.
+b) Cấp chứng từ khấu trừ trong một số trường hợp cụ thể như sau:
+b.1) Đối với cá nhân không ký hợp đồng lao động hoặc ký hợp đồng lao động dưới ba (03) tháng: Cá nhân có quyền yêu cầu tổ chức, cá nhân trả thu nhập cấp chứng từ khấu trừ cho mỗi lần khấu trừ thuế hoặc cấp một chứng từ khấu trừ cho nhiều lần khấu trừ thuế trong một kỳ tính thuế.
+b.2) Đối với cá nhân ký hợp đồng lao động từ ba (03) tháng trở lên: tổ chức, cá nhân trả thu nhập chỉ cấp cho cá nhân một chứng từ khấu trừ trong một kỳ tính thuế.
+Căn cứ các quy định trên, trường hợp Công ty sử dụng chứng từ điện tử khấu trừ thuế thu nhập cá nhân theo quy định tại Nghị định 123/2020/NĐ-CP ngày 19/10/2020 của Chính phủ thì:
+- Khi khấu trừ thuế thu nhập cá nhân tổ chức khấu trừ thuế phải lập chứng từ khấu trừ thuế giao cho người có thu nhập bị khấu trừ thuế và phải ghi đầy đủ các nội dung theo quy định tại Điều 32 Nghị định 123/2020/NĐ-CP.
+Trường hợp cá nhân ủy quyền quyết toán thuế thì không cấp chứng từ khấu trừ thuế thu nhập cá nhân.
+Đối với cá nhân không ký hợp đồng lao động hoặc ký hợp đồng lao động dưới 03 tháng thì tổ chức, cá nhân trả thu nhập được lựa chọn cấp chứng từ khấu trừ thuế cho mỗi lần khấu trừ thuế hoặc cấp một chứng từ khấu trừ cho nhiều lần khấu trừ thuế trong một kỳ tính thuế.
+Đối với cá nhân ký hợp đồng lao động từ 03 tháng trở lên, tổ chức, cá nhân trả thu nhập chỉ cấp cho cá nhân một chứng từ khấu trừ thuế trong một kỳ tính thuế.
+- Tại Nghị định 123/2020/NĐ-CP không quy định đơn vị phải đăng ký sử dụng và nộp báo cáo tình hình sử dụng chứng từ điện tử khấu trừ thuế thu nhập cá nhân tới cơ quan thuế.
+Nội dung và định dạng chứng từ điện tử khấu trừ thuế thu nhập cá nhân thực hiện theo quy định tại Điều 32, Điều 33 Nghị định số 123/2020/NĐ-CP ngày 19/10/2020 của Chính Phủ.
+Đề nghị Công ty căn cứ tình hình thực tế tại đơn vị và đối chiếu với các văn bản quy phạm pháp luật nêu trên để thực hiện theo đúng quy định.
+Trường hợp Công ty có vướng mắc về chính sách thuế, Công ty có thể tham khảo các văn bản hướng dẫn của Cục Thuế TP Hà Nội được đăng tải trên website http://hanoi.gdt.gov.vn hoặc liên hệ với Phòng Thanh tra - Kiểm Tra số 7 để được hỗ trợ giải quyết.
+Cục Thuế TP Hà Nội trả lời để Công ty cổ phần đầu tư và thương mại CTM được biết và thực hiện./.
+Nơi nhận:
+- Như trên;
+- Phòng NVDTPC;
+- Phòng TKT7;
+- Website Cục thuế;
+- Lưu: VT,TTHT(2).
+KT. CỤC TRƯỞNG
+PHÓ CỤC TRƯỞNG
+Nguyễn Tiến Trường
