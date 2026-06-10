@@ -25,7 +25,7 @@ from backend.app.schemas.query_route import (
 )
 from backend.app.services.embedding_service import EmbeddingService
 from backend.app.services.context_builder_service import ContextBuilderService
-from backend.app.services.llm_service import LLMService
+from backend.app.services.llm_service import LLMService, LLMServiceError
 from backend.app.services.prompt_builder_service import PromptBuilderService
 from backend.app.services.reranker_service import RerankerService
 from backend.app.services.response_formatter_service import ResponseFormatterService
@@ -251,14 +251,24 @@ class ChatGatewayService:
                 context=search_response.context,
                 calculation=search_response.calculation,
                 routing=routing,
+                effective_date=request.effective_date,
             )
-            answer = response_validation.safe_answer or llm_result.answer or llm_result.raw_text
-            warning = _merge_warning_text(llm_result.warning, response_validation.warning)
-        except Exception:
+            answer = (
+                response_validation.safe_answer
+                or llm_result.answer
+                or llm_result.raw_text
+            )
+            warning = _merge_warning_text(
+                llm_result.warning,
+                response_validation.warning,
+            )
+        except LLMServiceError:
             response_mode = "llm_fallback"
             llm_result = None
             response_validation = None
-            answer = _build_extractive_fallback_answer(search_response.citations)
+            answer = _build_extractive_fallback_answer(
+                search_response.citations
+            )
             warning = LLM_FALLBACK_WARNING
 
         response = self.response_formatter.format_chat_response(

@@ -100,21 +100,41 @@ def _build_retrieval_metadata(response: ChatResponse) -> dict[str, Any]:
     return {
         "mode": response.mode,
         "confidence": response.confidence,
-        "warning": response.warning,
+        "warnings": response.warnings,
         "calculation": (
-            response.calculation.model_dump(mode="json") if response.calculation else None
+            response.calculation.model_dump(mode="json")
+            if response.calculation
+            else None
         ),
         "classification": (
-            response.classification.model_dump(mode="json") if response.classification else None
+            response.classification.model_dump(mode="json")
+            if response.classification
+            else None
         ),
-        "routing": response.routing.model_dump(mode="json") if response.routing else None,
+        "routing": (
+            response.routing.model_dump(mode="json")
+            if response.routing
+            else None
+        ),
         "query_embedding": (
-            response.query_embedding.model_dump(mode="json") if response.query_embedding else None
+            response.query_embedding.model_dump(mode="json")
+            if response.query_embedding
+            else None
         ),
-        "retrieval": response.retrieval.model_dump(mode="json") if response.retrieval else None,
-        "reranking": response.reranking.model_dump(mode="json") if response.reranking else None,
+        "retrieval": (
+            response.retrieval.model_dump(mode="json")
+            if response.retrieval
+            else None
+        ),
+        "reranking": (
+            response.reranking.model_dump(mode="json")
+            if response.reranking
+            else None
+        ),
         "tax_calculation": (
-            response.tax_calculation.model_dump(mode="json") if response.tax_calculation else None
+            response.tax_calculation.model_dump(mode="json")
+            if response.tax_calculation
+            else None
         ),
         "response_validation": (
             response.response_validation.model_dump(mode="json")

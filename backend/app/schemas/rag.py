@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from datetime import date
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from backend.app.schemas.context import ContextBuildResult
 from backend.app.schemas.llm import LLMGenerationResult
@@ -38,34 +38,64 @@ class SearchRequest(BaseModel):
         max_length=1000,
         description="User question in Vietnamese.",
     )
-    top_k: int | None = Field(default=None, ge=1, description="Number of chunks to retrieve.")
+    top_k: int | None = Field(
+        default=None,
+        ge=1,
+        le=50,
+        description="Number of chunks to retrieve.",
+    )
     rerank_top_k: int | None = Field(
         default=None,
         ge=1,
+        le=20,
         description="Number of chunks to keep after re-ranking.",
     )
     context_max_tokens: int | None = Field(
         default=None,
         ge=100,
-        description="Approximate token budget for the LLM context built from re-ranked chunks.",
+        le=12000,
+        description="Approximate token budget for the LLM context.",
     )
     filter_metadata: dict[str, Any] = Field(default_factory=dict)
-    status: str | None = Field(default="effective", description="Document status filter.")
-    effective_date: date | None = Field(default=None, description="Legal effective date filter.")
-    gross_income: int | None = Field(default=None, ge=0, description="Override gross income for tax calculation.")
-    income_period: str | None = Field(default=None, description="monthly or yearly.")
+    status: str | None = Field(default="effective")
+    effective_date: date | None = None
+
+    gross_income: int | None = Field(default=None, ge=0)
+    income_period: Literal["monthly", "yearly"] | None = None
     mandatory_insurance: int | None = Field(default=None, ge=0)
     tax_exempt_income: int | None = Field(default=None, ge=0)
-    dependents: int | None = Field(default=None, ge=0)
+    dependents: int | None = Field(default=None, ge=0, le=100)
     charity_contributions: int | None = Field(default=None, ge=0)
     other_deductions: int | None = Field(default=None, ge=0)
-    resident_status: str | None = Field(default=None, description="resident or non_resident.")
-    contract_type: str | None = Field(default=None)
-    tax_year: int | None = Field(default=None, ge=1900)
+    resident_status: Literal["resident", "non_resident"] | None = None
+    contract_type: str | None = Field(default=None, max_length=100)
+    tax_year: int | None = Field(default=None, ge=1900, le=2200)
+
+    @field_validator("filter_metadata")
+    @classmethod
+    def validate_filter_metadata(cls, value: dict[str, Any]) -> dict[str, Any]:
+        if len(value) > 20:
+            raise ValueError("filter_metadata must contain at most 20 keys.")
+
+        for key, item in value.items():
+            if len(str(key)) > 100:
+                raise ValueError("filter_metadata key is too long.")
+            if isinstance(item, (dict, list)):
+                raise ValueError(
+                    "filter_metadata only accepts scalar values in this API."
+                )
+            if item is not None and len(str(item)) > 500:
+                raise ValueError("filter_metadata value is too long.")
+        return value
 
 
 class ChatRequest(SearchRequest):
-    conversation_id: str | None = Field(default=None)
+    conversation_id: str | None = Field(
+        default=None,
+        min_length=1,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9_.:-]+$",
+    )
 
 
 class Citation(BaseModel):
@@ -117,17 +147,20 @@ class ChatResponse(BaseModel):
     mode: str
     citations: list[FormattedCitation]
     confidence: float | None = None
-    warning: str | None = None
+    warnings: list[str] = Field(default_factory=list)
     calculation: FormattedCalculation | None = None
-    processed_question: ProcessedQuestion | None = None
-    classification: QueryClassificationResult | None = None
-    routing: QueryRoutingResult | None = None
-    query_embedding: QueryEmbeddingResult | None = None
-    retrieval: RetrievalResult | None = None
-    reranking: RerankingResult | None = None
-    tax_calculation: TaxCalculationResult | None = None
-    context: ContextBuildResult | None = None
-    prompt: PromptBuildResult | None = None
-    llm: LLMGenerationResult | None = None
-    response_validation: ResponseValidationResult | None = None
-    response_formatter: ResponseFormatResult | None = None
+
+    # Internal diagnostics. They stay available inside Python, but are excluded
+    # from normal API serialization unless a separate debug response is built.
+    processed_question: ProcessedQuestion | None = Field(default=None, exclude=True)
+    classification: QueryClassificationResult | None = Field(default=None, exclude=True)
+    routing: QueryRoutingResult | None = Field(default=None, exclude=True)
+    query_embedding: QueryEmbeddingResult | None = Field(default=None, exclude=True)
+    retrieval: RetrievalResult | None = Field(default=None, exclude=True)
+    reranking: RerankingResult | None = Field(default=None, exclude=True)
+    tax_calculation: TaxCalculationResult | None = Field(default=None, exclude=True)
+    context: ContextBuildResult | None = Field(default=None, exclude=True)
+    prompt: PromptBuildResult | None = Field(default=None, exclude=True)
+    llm: LLMGenerationResult | None = Field(default=None, exclude=True)
+    response_validation: ResponseValidationResult | None = Field(default=None, exclude=True)
+    response_formatter: ResponseFormatResult | None = Field(default=None, exclude=True)

@@ -8,7 +8,21 @@ from backend.app.core.config import Settings
 from backend.app.schemas.llm import LLMGenerationResult, LLMProvider
 from backend.app.schemas.prompt import PromptBuildResult, PromptMessage
 
+class LLMServiceError(RuntimeError):
+    """Lỗi cơ sở của dịch vụ LLM."""
 
+
+class LLMConfigurationError(LLMServiceError):
+    """Lỗi cấu hình nhà cung cấp hoặc API key."""
+
+
+class LLMProviderError(LLMServiceError):
+    """Lỗi khi gọi nhà cung cấp LLM."""
+
+
+class LLMEmptyResponseError(LLMServiceError):
+    """LLM không trả về nội dung hợp lệ."""
+    
 class LLMService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings

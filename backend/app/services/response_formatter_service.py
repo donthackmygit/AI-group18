@@ -112,8 +112,11 @@ def _format_answer(answer: str | None) -> str:
 
 def _format_citation(citation: Citation) -> FormattedCitation:
     metadata = citation.metadata or {}
+
     return FormattedCitation(
         citation_id=citation.citation_id,
+        chunk_id=citation.chunk_id,
+        document_id=citation.document_id,
         document_name=_first_text(
             citation.document_title,
             metadata.get("document_name"),
@@ -121,7 +124,18 @@ def _format_citation(citation: Citation) -> FormattedCitation:
             citation.document_number,
             citation.document_id,
         ),
-        document_number=_first_text(citation.document_number, metadata.get("document_number")),
+        document_number=_first_text(
+            citation.document_number,
+            metadata.get("document_number"),
+        ),
+        document_type=_first_text(
+            citation.document_type,
+            metadata.get("document_type"),
+        ),
+        issuing_authority=_first_text(
+            citation.issuing_authority,
+            metadata.get("issuing_authority"),
+        ),
         article=_format_article(citation),
         clause=_format_clause(metadata),
         content=_format_content(citation.content),

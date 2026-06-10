@@ -31,11 +31,13 @@ class ResponseValidationService:
         context: ContextBuildResult | None,
         calculation: TaxCalculationResult | None,
         routing: QueryRoutingResult,
+        effective_date: date | None = None,
     ) -> ResponseValidationResult:
         issues: list[ResponseValidationIssue] = []
         source_map = _source_map(context)
         allowed_source_ids = set(source_map)
         answer = (llm_result.answer or llm_result.raw_text or "").strip()
+        validation_date = effective_date or date.today()
 
         if not answer:
             issues.append(
@@ -93,7 +95,13 @@ class ResponseValidationService:
 
         issues.extend(_validate_citation_metadata(llm_result.citations, source_map))
         issues.extend(_validate_document_references(answer, source_map))
-        issues.extend(_validate_effective_sources(cited_source_ids, source_map))
+        issues.extend(
+            _validate_effective_sources(
+                cited_source_ids,
+                source_map,
+                validation_date,
+            )
+        )
         calculation_issues = _validate_calculation_output(llm_result, calculation, routing)
         issues.extend(calculation_issues)
 
@@ -247,36 +255,66 @@ def _validate_document_references(
 def _validate_effective_sources(
     cited_source_ids: list[str],
     source_map: dict[str, ContextSource],
+    validation_date: date,
 ) -> list[ResponseValidationIssue]:
-    today = date.today()
     issues: list[ResponseValidationIssue] = []
+
     for source_id in cited_source_ids:
         source = source_map.get(source_id)
         if source is None:
             continue
-        status = (source.status or "").strip().casefold()
-        if status and status not in {"effective", "còn hiệu lực", "con hieu luc"}:
+
+        if source.effective_date and source.effective_date > validation_date:
             issues.append(
                 _issue(
-                    code="SOURCE_NOT_EFFECTIVE",
-                    severity=ResponseValidationSeverity.WARNING,
-                    message=f"Cited source {source_id} is not marked as effective.",
+                    code="SOURCE_NOT_YET_EFFECTIVE",
+                    severity=ResponseValidationSeverity.ERROR,
+                    message=(
+                        f"Cited source {source_id} becomes effective on "
+                        f"{source.effective_date.isoformat()}, after the requested date "
+                        f"{validation_date.isoformat()}."
+                    ),
                     citation_id=source_id,
-                    field="status",
+                    field="effective_date",
                 )
             )
-        if source.expiry_date and source.expiry_date < today:
+
+        if source.expiry_date and source.expiry_date < validation_date:
             issues.append(
                 _issue(
-                    code="SOURCE_EXPIRED",
-                    severity=ResponseValidationSeverity.WARNING,
-                    message=f"Cited source {source_id} expired on {source.expiry_date.isoformat()}.",
+                    code="SOURCE_EXPIRED_AT_REQUESTED_DATE",
+                    severity=ResponseValidationSeverity.ERROR,
+                    message=(
+                        f"Cited source {source_id} expired on "
+                        f"{source.expiry_date.isoformat()}, before the requested date "
+                        f"{validation_date.isoformat()}."
+                    ),
                     citation_id=source_id,
                     field="expiry_date",
                 )
             )
-    return issues
 
+        status = (source.status or "").strip().casefold()
+        accepted_statuses = {
+            "effective",
+            "partially_effective",
+            "còn hiệu lực",
+            "con hieu luc",
+            "một phần hiệu lực",
+            "mot phan hieu luc",
+        }
+        if status and status not in accepted_statuses:
+            issues.append(
+                _issue(
+                    code="SOURCE_STATUS_REQUIRES_REVIEW",
+                    severity=ResponseValidationSeverity.WARNING,
+                    message=f"Cited source {source_id} has status '{source.status}'.",
+                    citation_id=source_id,
+                    field="status",
+                )
+            )
+
+    return issues
 
 def _validate_calculation_output(
     llm_result: LLMGenerationResult,
@@ -395,4 +433,3 @@ def _warning_text(issues: list[ResponseValidationIssue]) -> str | None:
     if errors:
         return f"Response validation failed with {errors} error(s) and {warnings} warning(s)."
     return f"Response validation passed with {warnings} warning(s)."
-

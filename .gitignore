@@ -3,7 +3,12 @@ frontend/.env
 .cache/
 __pycache__/
 *.pyc
+.pytest_cache/
+.coverage
+htmlcov/
 backend/*.log
-frontend/node_modules/
+*.log
+node_modules/
+**/node_modules/
 frontend/dist/
-frontend/*.log
+dist/

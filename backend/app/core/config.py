@@ -70,28 +70,36 @@ def configure_model_cache() -> None:
 class Settings:
     app_name: str
     app_version: str
+    app_env: str
+    debug_rag_response: bool
+
     embedding_model_name: str
     embedding_local_files_only: bool
+
     default_top_k: int
     max_top_k: int
     default_rerank_top_k: int
     max_rerank_top_k: int
     default_context_max_tokens: int
     max_context_tokens: int
+
     llm_provider: str
     llm_model: str
     llm_temperature: float
     llm_max_output_tokens: int
     llm_timeout_ms: int
     gemini_api_key: str
+
     max_question_length: int
     cors_origins: tuple[str, ...]
+
     supabase_db_host: str
     supabase_db_port: int
     supabase_db_name: str
     supabase_db_user: str
     supabase_db_password: str
     supabase_db_sslmode: str
+
     supabase_url: str
     supabase_anon_key: str
 
@@ -109,28 +117,66 @@ class Settings:
         return cls(
             app_name=os.getenv("APP_NAME", "Chatbot Thuế TNCN API"),
             app_version=os.getenv("APP_VERSION", "0.1.0"),
-            embedding_model_name=os.getenv("EMBEDDING_MODEL_NAME", "intfloat/multilingual-e5-base"),
-            embedding_local_files_only=_env_bool("EMBEDDING_LOCAL_FILES_ONLY", True),
-            default_top_k=_env_int("RAG_DEFAULT_TOP_K", 10),
-            max_top_k=_env_int("RAG_MAX_TOP_K", 20),
-            default_rerank_top_k=_env_int("RAG_DEFAULT_RERANK_TOP_K", 5),
-            max_rerank_top_k=_env_int("RAG_MAX_RERANK_TOP_K", 10),
-            default_context_max_tokens=_env_int("RAG_DEFAULT_CONTEXT_MAX_TOKENS", 3000),
-            max_context_tokens=_env_int("RAG_MAX_CONTEXT_TOKENS", 8000),
+            app_env=os.getenv("APP_ENV", "development").strip().lower() or "development",
+            debug_rag_response=_env_bool("DEBUG_RAG_RESPONSE", False),
+
+            embedding_model_name=os.getenv(
+                "EMBEDDING_MODEL_NAME",
+                "intfloat/multilingual-e5-base",
+            ),
+            embedding_local_files_only=_env_bool(
+                "EMBEDDING_LOCAL_FILES_ONLY",
+                True,
+            ),
+
+            default_top_k=max(1, _env_int("RAG_DEFAULT_TOP_K", 10)),
+            max_top_k=max(1, _env_int("RAG_MAX_TOP_K", 20)),
+            default_rerank_top_k=max(
+                1,
+                _env_int("RAG_DEFAULT_RERANK_TOP_K", 5),
+            ),
+            max_rerank_top_k=max(
+                1,
+                _env_int("RAG_MAX_RERANK_TOP_K", 10),
+            ),
+            default_context_max_tokens=max(
+                100,
+                _env_int("RAG_DEFAULT_CONTEXT_MAX_TOKENS", 3000),
+            ),
+            max_context_tokens=max(
+                100,
+                _env_int("RAG_MAX_CONTEXT_TOKENS", 8000),
+            ),
+
             llm_provider=os.getenv("LLM_PROVIDER", "gemini").strip().lower() or "gemini",
             llm_model=os.getenv("LLM_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash",
             llm_temperature=_env_float("LLM_TEMPERATURE", 0.1),
-            llm_max_output_tokens=_env_int("LLM_MAX_OUTPUT_TOKENS", 1500),
-            llm_timeout_ms=_env_int("LLM_TIMEOUT_MS", 30000),
+            llm_max_output_tokens=max(
+                1,
+                _env_int("LLM_MAX_OUTPUT_TOKENS", 1500),
+            ),
+            llm_timeout_ms=max(
+                1000,
+                _env_int("LLM_TIMEOUT_MS", 30000),
+            ),
             gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
-            max_question_length=_env_int("MAX_QUESTION_LENGTH", 1000),
+
+            max_question_length=max(
+                1,
+                _env_int("MAX_QUESTION_LENGTH", 1000),
+            ),
             cors_origins=origins,
+
             supabase_db_host=os.getenv("SUPABASE_DB_HOST", "").strip(),
             supabase_db_port=_env_int("SUPABASE_DB_PORT", 5432),
             supabase_db_name=os.getenv("SUPABASE_DB_NAME", "postgres").strip(),
             supabase_db_user=os.getenv("SUPABASE_DB_USER", "").strip(),
             supabase_db_password=os.getenv("SUPABASE_DB_PASSWORD", "").strip(),
-            supabase_db_sslmode=os.getenv("SUPABASE_DB_SSLMODE", "require").strip() or "require",
+            supabase_db_sslmode=os.getenv(
+                "SUPABASE_DB_SSLMODE",
+                "require",
+            ).strip() or "require",
+
             supabase_url=(
                 os.getenv("SUPABASE_URL", "").strip()
                 or os.getenv("VITE_SUPABASE_URL", "").strip()
@@ -155,13 +201,15 @@ class Settings:
 
     @property
     def llm_configured(self) -> bool:
-        if self.llm_provider != "gemini":
-            return False
-        return bool(self.gemini_api_key)
+        return self.llm_provider == "gemini" and bool(self.gemini_api_key)
 
     @property
     def supabase_auth_configured(self) -> bool:
         return bool(self.supabase_url and self.supabase_anon_key)
+
+    @property
+    def expose_debug_payload(self) -> bool:
+        return self.app_env != "production" and self.debug_rag_response
 
     def database_kwargs(self) -> dict[str, str | int]:
         if not self.database_configured:
@@ -179,7 +227,6 @@ class Settings:
             "password": self.supabase_db_password,
             "sslmode": self.supabase_db_sslmode,
         }
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

@@ -5,8 +5,12 @@ from pydantic import BaseModel, Field
 
 class FormattedCitation(BaseModel):
     citation_id: str
+    chunk_id: str
+    document_id: str | None = None
     document_name: str | None = None
     document_number: str | None = None
+    document_type: str | None = None
+    issuing_authority: str | None = None
     article: str | None = None
     clause: str | None = None
     content: str
@@ -30,5 +34,5 @@ class ResponseFormatResult(BaseModel):
     citation_count: int
     calculation_included: bool
     confidence: float | None = None
-    warning_included: bool
+    warning_count: int = 0
     note: str | None = None
