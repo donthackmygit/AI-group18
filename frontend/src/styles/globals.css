@@ -490,20 +490,39 @@ a {
 }
 
 .answer-text {
-  padding: 18px;
+  padding-top: 24px;
+  padding-right: 24px;
+  padding-bottom: 24px;
+  padding-left: 32px;
+
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  line-height: 1.7;
+  line-height: 1.75;
   box-shadow: var(--shadow-soft);
+  overflow-wrap: anywhere;
+}
+
+.answer-text > :first-child {
+  margin-top: 0;
+}
+
+.answer-text > :last-child {
+  margin-bottom: 0;
 }
 
 .answer-text p {
-  margin: 0 0 10px;
+  margin: 0 0 14px;
 }
 
-.answer-text p:last-child {
-  margin-bottom: 0;
+.answer-text ul,
+.answer-text ol {
+  margin: 10px 0 16px;
+  padding-left: 28px;
+}
+
+.answer-text li {
+  margin-bottom: 8px;
 }
 
 .section-heading {

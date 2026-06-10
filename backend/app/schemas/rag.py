@@ -149,6 +149,7 @@ class ChatResponse(BaseModel):
     confidence: float | None = None
     warnings: list[str] = Field(default_factory=list)
     calculation: FormattedCalculation | None = None
+    debug: dict[str, Any] | None = None
 
     # Internal diagnostics. They stay available inside Python, but are excluded
     # from normal API serialization unless a separate debug response is built.

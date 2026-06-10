@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import json
 import re
 from typing import Any
 
@@ -62,10 +62,10 @@ class ResponseFormatterService:
         formatted_citations = [_format_citation(citation) for citation in source_citations]
         formatted_calculation = _format_calculation(calculation)
         formatted_confidence = _format_confidence(confidence, llm)
-        formatted_warning = _format_warning(
+        formatted_warnings = _format_warnings(
             warning,
             calculation.warnings if calculation else [],
-            include_advisory=mode == "llm",
+            include_advisory=mode in {"llm", "llm_fallback"},
         )
 
         return ChatResponse(
@@ -75,7 +75,7 @@ class ResponseFormatterService:
             mode=mode,
             citations=formatted_citations,
             confidence=formatted_confidence,
-            warning=formatted_warning,
+            warnings=formatted_warnings,
             calculation=formatted_calculation,
             processed_question=processed_question,
             classification=classification,
@@ -94,11 +94,20 @@ class ResponseFormatterService:
                 citation_count=len(formatted_citations),
                 calculation_included=formatted_calculation is not None,
                 confidence=formatted_confidence,
-                warning_included=formatted_warning is not None,
+                warning_count=len(formatted_warnings),
                 note=(
                     "Response Formatter normalizes the final backend response into answer, "
                     "conversation_id, citations, calculation, confidence, and warning fields."
                 ),
+            ),
+            debug=(
+                {
+                    "response_validation": response_validation.model_dump(mode="json")
+                    if response_validation
+                    else None
+                }
+                if settings.expose_debug_payload
+                else None
             ),
         )
 
@@ -106,8 +115,51 @@ class ResponseFormatterService:
 def _format_answer(answer: str | None) -> str:
     if answer is None:
         return EMPTY_ANSWER
+
     normalized = answer.strip()
-    return normalized or EMPTY_ANSWER
+    if not normalized:
+        return EMPTY_ANSWER
+
+    parsed_answer = _extract_answer_from_json(normalized)
+    return parsed_answer or normalized
+
+
+def _extract_answer_from_json(value: str) -> str | None:
+    candidates = [
+        value,
+        _strip_json_markdown_fence(value),
+    ]
+
+    for candidate in candidates:
+        if not candidate:
+            continue
+
+        try:
+            parsed = json.loads(candidate)
+        except json.JSONDecodeError:
+            continue
+
+        if not isinstance(parsed, dict):
+            continue
+
+        answer = parsed.get("answer")
+        if isinstance(answer, str) and answer.strip():
+            return answer.strip()
+
+    return None
+
+
+def _strip_json_markdown_fence(value: str) -> str | None:
+    match = re.fullmatch(
+        r"\s*```(?:json)?\s*(.*?)\s*```\s*",
+        value,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+
+    if not match:
+        return None
+
+    return match.group(1).strip()
 
 
 def _format_citation(citation: Citation) -> FormattedCitation:
@@ -219,23 +271,31 @@ def _format_confidence(
     return round(min(max(float(value), 0.0), 1.0), 4)
 
 
-def _format_warning(
+def _format_warnings(
     warning: str | None,
     calculation_warnings: list[str],
     *,
     include_advisory: bool,
-) -> str | None:
+) -> list[str]:
     values: list[str] = []
+
     if warning:
-        values.append(warning)
-    values.extend(calculation_warnings)
+        values.extend(
+            part.strip()
+            for part in warning.split("|")
+            if part.strip()
+        )
+
+    values.extend(
+        value.strip()
+        for value in calculation_warnings
+        if value and value.strip()
+    )
+
     if include_advisory:
         values.append(ADVISORY_WARNING)
 
-    normalized_values = [value.strip() for value in values if value and value.strip()]
-    if not normalized_values:
-        return None
-    return " | ".join(dict.fromkeys(normalized_values))
+    return list(dict.fromkeys(values))
 
 
 def _first_text(*values: Any) -> str | None:
