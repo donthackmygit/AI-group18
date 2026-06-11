@@ -841,6 +841,57 @@ a {
   white-space: pre-wrap;
 }
 
+.feedback {
+  display: grid;
+  gap: 6px;
+}
+
+.feedback-status {
+  margin: 0;
+  color: var(--color-green);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.drawer-close-button {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.drawer-close-button:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+  transform: rotate(90deg);
+}
+
+.source-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.source-link--secondary {
+  background: var(--color-blue-soft);
+  color: var(--color-blue);
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;

@@ -16,18 +16,20 @@ from backend.app.services.context_builder_service import estimate_tokens
 
 SYSTEM_INSTRUCTION = (
     "Bạn là trợ lý giải đáp Thuế Thu nhập cá nhân tại Việt Nam. "
-    "Nhiệm vụ của bạn là giải thích quy định dựa trên tài liệu pháp luật được cung cấp, "
-    "trình bày rõ ràng, có căn cứ, và không thay thế ý kiến của cơ quan thuế hoặc chuyên gia thuế."
+    "Luôn trả lời bằng tiếng Việt tự nhiên, rõ ràng, dễ hiểu. "
+    "Không dùng tên biến kỹ thuật như gross_income, taxable_income, mandatory_insurance, "
+    "personal_deduction, dependent_deduction trong câu trả lời cho người dùng. "
+    "Không thay thế ý kiến của cơ quan thuế hoặc chuyên gia thuế."
 )
 
 BASE_ANSWER_RULES = [
-    "Chỉ trả lời dựa trên tài liệu được cung cấp trong phần CONTEXT.",
+    "Chỉ trả lời dựa trên tài liệu được cung cấp trong phần CONTEXT và kết quả Tax Calculation Service nếu có.",
     "Không tự tạo ra mức thuế, điều luật, khoản, điểm hoặc số hiệu văn bản.",
     "Nếu tài liệu không đủ để trả lời, hãy nói rõ rằng chưa tìm thấy đủ căn cứ pháp lý.",
+    "Trường answer phải là tiếng Việt tự nhiên, không chứa tên biến kỹ thuật.",
     "Không chèn mã nguồn như [SOURCE_1], [SOURCE_2] trực tiếp trong trường answer.",
     "Nguồn trích dẫn phải đưa vào trường citations của JSON, không đưa vào nội dung answer.",
     "Ưu tiên văn bản đang có hiệu lực khi các nguồn có nội dung khác nhau.",
-    "Không thay thế ý kiến của chuyên gia thuế hoặc cơ quan quản lý thuế.",
 ]
 
 NO_CONTEXT_RULE = (
@@ -36,8 +38,11 @@ NO_CONTEXT_RULE = (
 )
 
 TAX_CALCULATION_RULE = (
-    "Với câu hỏi tính toán, không tự quyết định toàn bộ số thuế khi chưa có kết quả từ "
-    "Tax Calculation Service; chỉ giải thích căn cứ, công thức và thông tin còn thiếu nếu có."
+    "Với câu hỏi tính thuế, dùng đúng số liệu từ Tax Calculation Service. "
+    "Giải thích kết quả bằng tiếng Việt tự nhiên, ví dụ: "
+    "'Với thu nhập 30 triệu đồng/tháng và 2 người phụ thuộc, sau khi trừ các khoản giảm trừ, "
+    "thu nhập tính thuế là ... và số thuế TNCN tạm tính là ...'. "
+    "Không hiển thị tên biến kỹ thuật."
 )
 
 
@@ -130,8 +135,8 @@ def _output_format(requires_tax_calculation: bool) -> dict[str, object]:
 
     return {
         "answer": (
-            "string - nội dung trả lời cho người dùng, không chứa [SOURCE_1], "
-            "[SOURCE_2] hoặc các mã citation inline"
+            "string - tiếng Việt tự nhiên, không chứa [SOURCE_1], "
+            "không chứa gross_income/taxable_income/mandatory_insurance/personal_deduction/dependent_deduction"
         ),
         "citations": [
             {

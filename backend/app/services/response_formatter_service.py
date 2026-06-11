@@ -35,10 +35,23 @@ CONFIDENCE_LABELS = {
     "medium": 0.65,
     "high": 0.85,
 }
-INLINE_SOURCE_MARKER_RE = re.compile(
+INLINE_MARKER_RE = re.compile(
     r"\s*\[(?:SOURCE|QUEST|QUESTION|CITATION)_\d+\]\s*",
     flags=re.IGNORECASE,
 )
+
+TECHNICAL_REPLACEMENTS = {
+    "gross_income": "thu nhập chịu thuế",
+    "tax_exempt_income": "thu nhập được miễn thuế",
+    "mandatory_insurance": "bảo hiểm bắt buộc",
+    "personal_deduction": "giảm trừ bản thân",
+    "dependent_deduction": "giảm trừ người phụ thuộc",
+    "charity_contributions": "khoản đóng góp từ thiện",
+    "other_deductions": "khoản giảm trừ khác",
+    "taxable_income": "thu nhập tính thuế",
+    "tax_amount": "số thuế phải nộp",
+    "contract_type": "loại hợp đồng",
+}
 
 
 class ResponseFormatterService:
@@ -130,7 +143,7 @@ def _format_answer(answer: str | None) -> str:
         return EMPTY_ANSWER
 
     parsed_answer = _extract_answer_from_json(normalized)
-    cleaned = _remove_inline_source_markers(parsed_answer or normalized)
+    cleaned = _clean_user_facing_text(parsed_answer or normalized)
 
     return cleaned or EMPTY_ANSWER
 
@@ -172,6 +185,23 @@ def _strip_json_markdown_fence(value: str) -> str | None:
 
     return match.group(1).strip()
 
+def _clean_user_facing_text(value: str) -> str:
+    cleaned = INLINE_MARKER_RE.sub(" ", value)
+
+    for technical_name, vietnamese_name in TECHNICAL_REPLACEMENTS.items():
+        cleaned = re.sub(
+            rf"\b{re.escape(technical_name)}\b",
+            vietnamese_name,
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+
+    cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+    cleaned = re.sub(r"\n\s+", "\n", cleaned)
+
+    return cleaned.strip()
 
 def _remove_inline_source_markers(value: str) -> str:
     cleaned = INLINE_SOURCE_MARKER_RE.sub(" ", value)
@@ -274,13 +304,13 @@ def _format_calculation(calculation: TaxCalculationResult | None) -> FormattedCa
 
 
 def _format_calculation_step(step: TaxCalculationStep) -> str:
-    parts = [step.label]
+    parts = [_clean_user_facing_text(step.label)]
 
     if step.amount is not None:
         parts.append(f"{_format_money(step.amount)} VND")
 
     if step.formula:
-        parts.append(step.formula)
+        parts.append(_clean_user_facing_text(step.formula))
 
     return " - ".join(parts)
 
@@ -314,23 +344,42 @@ def _format_warnings(
 
     if warning:
         values.extend(
-            part.strip()
+            _clean_warning(part.strip())
             for part in warning.split("|")
             if part.strip()
         )
 
     values.extend(
-        value.strip()
+        _clean_warning(value.strip())
         for value in calculation_warnings
         if value and value.strip()
     )
+
+    values = [value for value in values if value]
 
     if include_advisory:
         values.append(ADVISORY_WARNING)
 
     return list(dict.fromkeys(values))
 
+def _clean_warning(value: str) -> str | None:
+    lowered = value.casefold()
 
+    hidden_prefixes = (
+        "response validation failed",
+        "response validation passed",
+        "citation field",
+        "llm output does not include calculation object",
+    )
+
+    if lowered.startswith(hidden_prefixes):
+        return None
+
+    if "contract_type was not provided" in lowered:
+        return None
+
+    return _clean_user_facing_text(value)
+    
 def _first_text(*values: Any) -> str | None:
     for value in values:
         if value is None:

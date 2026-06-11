@@ -4,27 +4,33 @@ export default function FeedbackButtons({ messageId, onSubmitFeedback }) {
   const [value, setValue] = useState(null);
   const [error, setError] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [notice, setNotice] = useState(null);
 
   async function submit(nextValue, rating) {
-    if (!onSubmitFeedback) {
-      setValue(nextValue);
-      return;
-    }
-
     setIsSaving(true);
     setError(null);
+    setNotice(null);
+
     try {
-      await onSubmitFeedback(messageId, rating);
+      if (onSubmitFeedback) {
+        await onSubmitFeedback(messageId, rating);
+      }
+
       setValue(nextValue);
+      setNotice(
+        nextValue === "useful"
+          ? "Đã ghi nhận: câu trả lời hữu ích."
+          : "Đã ghi nhận: câu trả lời chưa rõ."
+      );
     } catch (err) {
-      setError(err.message || "Không lưu được feedback.");
+      setError(err.message || "Không lưu được đánh giá.");
     } finally {
       setIsSaving(false);
     }
   }
 
   return (
-    <div>
+    <div className="feedback">
       <div className="feedback-group" aria-label="Đánh giá câu trả lời">
         <button
           className={`feedback-button ${value === "useful" ? "feedback-button--active" : ""}`}
@@ -35,6 +41,7 @@ export default function FeedbackButtons({ messageId, onSubmitFeedback }) {
         >
           Hữu ích
         </button>
+
         <button
           className={`feedback-button ${value === "unclear" ? "feedback-button--active" : ""}`}
           type="button"
@@ -44,8 +51,11 @@ export default function FeedbackButtons({ messageId, onSubmitFeedback }) {
         >
           Chưa rõ
         </button>
+
         <span className="sr-only">Feedback Supabase cho message {messageId}</span>
       </div>
+
+      {notice ? <p className="feedback-status">{notice}</p> : null}
       {error ? <p className="feedback-error">{error}</p> : null}
     </div>
   );

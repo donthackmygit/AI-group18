@@ -25,6 +25,9 @@ LOW_CONFIDENCE_ANSWER = (
 
 
 class ResponseValidationService:
+    def _has_valid_calculation(calculation: TaxCalculationResult | None) -> bool:
+        return bool(calculation and calculation.applied and calculation.tax_amount is not None)
+
     def validate(
         self,
         llm_result: LLMGenerationResult,
@@ -125,7 +128,7 @@ class ResponseValidationService:
             invalid_source_ids=invalid_source_ids,
             checked_source_ids=sorted(allowed_source_ids),
             calculation_valid=not any(issue.field == "calculation" for issue in calculation_issues),
-            safe_answer=LOW_CONFIDENCE_ANSWER if has_errors else None,
+            safe_answer=LOW_CONFIDENCE_ANSWER if has_errors and not _has_valid_calculation(calculation) else None,
             warning=warning,
             note=(
                 "Response Validation checks citations, source metadata, effective status, "
