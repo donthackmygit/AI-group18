@@ -1,7 +1,7 @@
 document_id,input_path,output_path,chunk_count,registry_status,missing_required_fields,duplicate_chunk_ids,status,note
 CIRCULAR_111_2013_TT_BTC,data/processed/chunks/CIRCULAR_111_2013_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_111_2013_TT_BTC_enriched_chunks.json,162,OK,,,OK,
-CIRCULAR_119_2014_TT_BTC,data/processed/chunks/CIRCULAR_119_2014_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_119_2014_TT_BTC_enriched_chunks.json,84,OK,,,OK,
-CIRCULAR_151_2014_TT_BTC,data/processed/chunks/CIRCULAR_151_2014_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_151_2014_TT_BTC_enriched_chunks.json,83,OK,,,OK,
+CIRCULAR_119_2014_TT_BTC,data/processed/chunks/CIRCULAR_119_2014_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_119_2014_TT_BTC_enriched_chunks.json,82,OK,,,OK,
+CIRCULAR_151_2014_TT_BTC,data/processed/chunks/CIRCULAR_151_2014_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_151_2014_TT_BTC_enriched_chunks.json,79,OK,,,OK,
 CIRCULAR_20_2010_TT_BTC,data/processed/chunks/CIRCULAR_20_2010_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_20_2010_TT_BTC_enriched_chunks.json,33,OK,,,OK,
 CIRCULAR_92_2015_TT_BTC,data/processed/chunks/CIRCULAR_92_2015_TT_BTC_chunks.json,data/processed/enriched_chunks/CIRCULAR_92_2015_TT_BTC_enriched_chunks.json,107,OK,,,OK,
 DECREE_12_2015_ND_CP,data/processed/chunks/DECREE_12_2015_ND_CP_chunks.json,data/processed/enriched_chunks/DECREE_12_2015_ND_CP_enriched_chunks.json,67,OK,,,OK,
@@ -27,7 +27,7 @@ DISPATCH_5001_TCT_DNNCN,data/processed/chunks/DISPATCH_5001_TCT_DNNCN_chunks.jso
 DISPATCH_6097_CTHN_TTHT,data/processed/chunks/DISPATCH_6097_CTHN_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_6097_CTHN_TTHT_enriched_chunks.json,7,OK,source_url,,WARNING,missing required metadata fields
 DISPATCH_61175_CTHN_TTHT,data/processed/chunks/DISPATCH_61175_CTHN_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_61175_CTHN_TTHT_enriched_chunks.json,3,OK,source_url,,WARNING,missing required metadata fields
 DISPATCH_61182_CTHN_TTHT,data/processed/chunks/DISPATCH_61182_CTHN_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_61182_CTHN_TTHT_enriched_chunks.json,3,OK,source_url,,WARNING,missing required metadata fields
-DISPATCH_63646_CTHN_TTHT,data/processed/chunks/DISPATCH_63646_CTHN_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_63646_CTHN_TTHT_enriched_chunks.json,0,OK,,,OK,
+DISPATCH_63646_CTHN_TTHT,data/processed/chunks/DISPATCH_63646_CTHN_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_63646_CTHN_TTHT_enriched_chunks.json,1,OK,source_url,,WARNING,missing required metadata fields
 DISPATCH_9208_CT_TTHT,data/processed/chunks/DISPATCH_9208_CT_TTHT_chunks.json,data/processed/enriched_chunks/DISPATCH_9208_CT_TTHT_enriched_chunks.json,1,OK,source_url,,WARNING,missing required metadata fields
 JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA,data/processed/chunks/JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA_chunks.json,data/processed/enriched_chunks/JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA_enriched_chunks.json,22,OK,,,OK,
 JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP,data/processed/chunks/JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP_chunks.json,data/processed/enriched_chunks/JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP_enriched_chunks.json,22,OK,,,OK,

@@ -1,16 +1,16 @@
 {
   "model_name": "intfloat/multilingual-e5-base",
   "input_path": "data/processed/enriched_chunks/all_enriched_chunks.json",
-  "chunk_count": 765,
+  "chunk_count": 760,
   "skipped_empty_count": 0,
   "embedding_shape": [
-    765,
+    760,
     768
   ],
   "normalized": true,
   "batch_size": 8,
   "local_files_only": false,
-  "generated_at": "2026-06-08T17:44:26",
+  "generated_at": "2026-06-11T10:05:35",
   "embeddings_path": "data/processed/embeddings/chunk_embeddings.npy",
   "chunks_metadata_path": "data/processed/embeddings/chunks_metadata.json"
 }

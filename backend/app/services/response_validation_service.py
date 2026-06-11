@@ -25,6 +25,7 @@ LOW_CONFIDENCE_ANSWER = (
 
 
 class ResponseValidationService:
+    @staticmethod
     def _has_valid_calculation(calculation: TaxCalculationResult | None) -> bool:
         return bool(calculation and calculation.applied and calculation.tax_amount is not None)
 

@@ -27,9 +27,9 @@ DISPATCH_5001_TCT_DNNCN,data\processed\cleaned_text\DISPATCH_5001_TCT_DNNCN.txt,
 DISPATCH_6097_CTHN_TTHT,data\processed\cleaned_text\DISPATCH_6097_CTHN_TTHT.txt,data\processed\structured_documents\DISPATCH_6097_CTHN_TTHT.json,0,0,0,70,NO_ARTICLE_FOUND,official_dispatch_paragraphs_only
 DISPATCH_61175_CTHN_TTHT,data\processed\cleaned_text\DISPATCH_61175_CTHN_TTHT.txt,data\processed\structured_documents\DISPATCH_61175_CTHN_TTHT.json,0,0,0,50,NO_ARTICLE_FOUND,official_dispatch_paragraphs_only
 DISPATCH_61182_CTHN_TTHT,data\processed\cleaned_text\DISPATCH_61182_CTHN_TTHT.txt,data\processed\structured_documents\DISPATCH_61182_CTHN_TTHT.json,0,0,0,37,NO_ARTICLE_FOUND,official_dispatch_paragraphs_only
-DISPATCH_63646_CTHN_TTHT,data\processed\cleaned_text\DISPATCH_63646_CTHN_TTHT.txt,data\processed\structured_documents\DISPATCH_63646_CTHN_TTHT.json,0,0,0,0,EMPTY,
+DISPATCH_63646_CTHN_TTHT,data\processed\cleaned_text\DISPATCH_63646_CTHN_TTHT.txt,data\processed\structured_documents\DISPATCH_63646_CTHN_TTHT.json,0,0,0,6,NO_ARTICLE_FOUND,official_dispatch_paragraphs_only
 DISPATCH_9208_CT_TTHT,data\processed\cleaned_text\DISPATCH_9208_CT_TTHT.txt,data\processed\structured_documents\DISPATCH_9208_CT_TTHT.json,0,0,0,25,NO_ARTICLE_FOUND,official_dispatch_paragraphs_only
 JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA,data\processed\cleaned_text\JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA.txt,data\processed\structured_documents\JOINT_CIRCULAR_206_2013_TTLT_BTC_BCA.json,7,20,29,0,OK,
 JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP,data\processed\cleaned_text\JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP.txt,data\processed\structured_documents\JOINT_CIRCULAR_212_2013_TTLT_BTC_BQP.json,6,19,29,0,OK,
 LAW_109_2025_QH15,data\processed\cleaned_text\LAW_109_2025_QH15.txt,data\processed\structured_documents\LAW_109_2025_QH15.json,29,111,59,0,OK,
-RESOLUTION_954_2020_UBTVQH14,data\processed\cleaned_text\RESOLUTION_954_2020_UBTVQH14.txt,data\processed\structured_documents\RESOLUTION_954_2020_UBTVQH14.json,2,4,0,0,OK,
+RESOLUTION_954_2020_UBTVQH14,data\processed\cleaned_text\RESOLUTION_954_2020_UBTVQH14.txt,,0,0,0,0,ERROR,Object of type datetime is not JSON serializable

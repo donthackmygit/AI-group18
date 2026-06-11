@@ -1,0 +1,8 @@
+===== PAGE 1 OCR ERROR =====
+tesseract is not installed or it's not in your PATH. See README file for more information.
+
+===== PAGE 2 OCR ERROR =====
+tesseract is not installed or it's not in your PATH. See README file for more information.
+
+===== PAGE 3 OCR ERROR =====
+tesseract is not installed or it's not in your PATH. See README file for more information.

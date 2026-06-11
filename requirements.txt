@@ -16,3 +16,7 @@ uvicorn[standard]
 google-genai
 pytest
 httpx
+requests
+beautifulsoup4
+pillow
+pytesseract

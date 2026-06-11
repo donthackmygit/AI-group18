@@ -19,13 +19,38 @@
     "version": 1,
     "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf."
   },
-  "parsed_at": "2026-06-08T11:59:41",
-  "parse_status": "EMPTY",
+  "parsed_at": "2026-06-11T09:51:26",
+  "parse_status": "NO_ARTICLE_FOUND",
   "article_count": 0,
   "clause_count": 0,
   "point_count": 0,
-  "paragraph_count": 0,
+  "paragraph_count": 6,
   "preamble": "",
   "articles": [],
-  "paragraphs": []
+  "paragraphs": [
+    {
+      "paragraph_id": 1,
+      "content": "===== PAGE 1 OCR ERROR ====="
+    },
+    {
+      "paragraph_id": 2,
+      "content": "tesseract is not installed or it's not in your PATH. See README file for more information."
+    },
+    {
+      "paragraph_id": 4,
+      "content": "===== PAGE 2 OCR ERROR ====="
+    },
+    {
+      "paragraph_id": 5,
+      "content": "tesseract is not installed or it's not in your PATH. See README file for more information."
+    },
+    {
+      "paragraph_id": 7,
+      "content": "===== PAGE 3 OCR ERROR ====="
+    },
+    {
+      "paragraph_id": 8,
+      "content": "tesseract is not installed or it's not in your PATH. See README file for more information."
+    }
+  ]
 }

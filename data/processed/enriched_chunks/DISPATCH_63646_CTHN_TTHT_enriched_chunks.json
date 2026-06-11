@@ -2,8 +2,46 @@
   "document_id": "DISPATCH_63646_CTHN_TTHT",
   "source_file": "data/processed/chunks/DISPATCH_63646_CTHN_TTHT_chunks.json",
   "registry_file": "data/metadata/document_registry.xlsx",
-  "enriched_at": "2026-06-08T15:58:06",
-  "chunk_count": 0,
+  "enriched_at": "2026-06-11T09:51:36",
+  "chunk_count": 1,
   "registry_status": "OK",
-  "chunks": []
+  "chunks": [
+    {
+      "chunk_id": "DISPATCH_63646_CTHN_TTHT_PARAGRAPH_CHUNK_001",
+      "document_id": "DISPATCH_63646_CTHN_TTHT",
+      "chunk_type": "paragraph_group",
+      "text": "===== PAGE 1 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 2 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 3 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.",
+      "char_count": 359,
+      "metadata": {
+        "document_id": "DISPATCH_63646_CTHN_TTHT",
+        "file_name": "63646-CTHN-TTHT.pdf",
+        "title": "Công văn 63646/CTHN-TTHT về miễn giảm thuế TNCN theo Hiệp định vận chuyển hàng không",
+        "document_number": "63646/CTHN-TTHT",
+        "document_type": "Công văn",
+        "issuing_authority": "Cục Thuế Thành phố Hà Nội",
+        "issue_date": "2023-08-30",
+        "effective_date": "2023-08-30",
+        "expiry_date": null,
+        "status": "effective",
+        "source_type": "official",
+        "source_url": null,
+        "local_path": "data/raw/official_dispatches/63646-CTHN-TTHT.pdf",
+        "download_date": "2026-06-07",
+        "topics": "thuế thu nhập cá nhân",
+        "version": 1,
+        "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf.",
+        "document_title": "Công văn 63646/CTHN-TTHT về miễn giảm thuế TNCN theo Hiệp định vận chuyển hàng không",
+        "document_name": "Công văn 63646/CTHN-TTHT về miễn giảm thuế TNCN theo Hiệp định vận chuyển hàng không",
+        "chunk_index": 1,
+        "chunk_source_type": "dispatch",
+        "source_structure": "paragraphs",
+        "parse_status": "NO_ARTICLE_FOUND",
+        "paragraph_start": 1,
+        "paragraph_end": 8,
+        "paragraph_count": 6,
+        "overlap_paragraphs": 0
+      },
+      "embedding_text": "===== PAGE 1 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 2 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 3 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information."
+    }
+  ]
 }
