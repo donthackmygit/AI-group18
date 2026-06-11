@@ -36,6 +36,9 @@ CONFIDENCE_LABELS = {
 
 
 class ResponseFormatterService:
+    def __init__(self, settings):
+        self.settings = settings
+
     def format_chat_response(
         self,
         *,
@@ -106,7 +109,7 @@ class ResponseFormatterService:
                     if response_validation
                     else None
                 }
-                if settings.expose_debug_payload
+                if self.settings.expose_debug_payload
                 else None
             ),
         )

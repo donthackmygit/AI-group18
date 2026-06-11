@@ -52,7 +52,7 @@ class ChatGatewayService:
         self.tax_calculation_service = TaxCalculationService()
         self.llm_service = LLMService(settings)
         self.response_validation_service = ResponseValidationService()
-        self.response_formatter = ResponseFormatterService()
+        self.response_formatter = ResponseFormatterService(settings)
         self.conversation_store = ConversationMemoryStore()
         self.auth_service = SupabaseAuthService(settings)
         self.chat_history_repository = ChatHistoryRepository(settings)
