@@ -36,7 +36,7 @@ from backend.app.services.tax_calculation_service import TaxCalculationService
 
 
 LLM_FALLBACK_WARNING = (
-    "Gemini không phản hồi kịp; hệ thống trả lời bằng nội dung trích xuất từ nguồn pháp luật."
+    "LLM chưa tạo được câu trả lời; hệ thống trả lời bằng nội dung trích xuất từ nguồn pháp luật."
 )
 
 
@@ -262,14 +262,18 @@ class ChatGatewayService:
                 llm_result.warning,
                 response_validation.warning,
             )
-        except LLMServiceError:
+
+        except LLMServiceError as exc:
             response_mode = "llm_fallback"
             llm_result = None
             response_validation = None
             answer = _build_extractive_fallback_answer(
                 search_response.citations
             )
-            warning = LLM_FALLBACK_WARNING
+            warning = _merge_warning_text(
+                LLM_FALLBACK_WARNING,
+                str(exc),
+            )
 
         response = self.response_formatter.format_chat_response(
             answer=answer,
