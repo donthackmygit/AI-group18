@@ -14,5 +14,3 @@ fastapi
 pydantic
 uvicorn[standard]
 google-genai
-pytest
-httpx
