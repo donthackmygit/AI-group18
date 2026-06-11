@@ -20,8 +20,8 @@ export default function CitationDrawer({ citation, onClose }) {
             <p className="eyebrow">Nguồn trích dẫn</p>
             <h2>{citation.document_name || citation.document_number || citation.citation_id}</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Đóng">
-            X
+          <button className="drawer-close-button" type="button" onClick={onClose} aria-label="Đóng">
+            ×
           </button>
         </div>
 

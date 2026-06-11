@@ -857,6 +857,8 @@ a {
   display: inline-flex;
   width: 38px;
   height: 38px;
+  min-width: 38px;
+  min-height: 38px;
   flex: 0 0 38px;
   align-items: center;
   justify-content: center;
@@ -864,6 +866,7 @@ a {
   border-radius: 999px;
   background: var(--color-surface);
   color: var(--color-muted);
+  cursor: pointer;
   font-size: 1.35rem;
   font-weight: 800;
   line-height: 1;

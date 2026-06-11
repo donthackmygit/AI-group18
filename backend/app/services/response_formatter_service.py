@@ -204,7 +204,7 @@ def _clean_user_facing_text(value: str) -> str:
     return cleaned.strip()
 
 def _remove_inline_source_markers(value: str) -> str:
-    cleaned = INLINE_SOURCE_MARKER_RE.sub(" ", value)
+    cleaned = INLINE_MARKER_RE.sub(" ", value)
     cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
     cleaned = re.sub(r"\(\s*\)", "", cleaned)
     cleaned = re.sub(r"\s{2,}", " ", cleaned)
@@ -241,7 +241,7 @@ def _format_citation(citation: Citation) -> FormattedCitation:
         article=_format_article(citation),
         clause=_format_clause(metadata),
         content=_format_content(citation.content),
-        source_url=citation.source_url,
+        source_url=_format_source_url(citation.source_url, metadata.get("source_url")),
         status=citation.status,
     )
 
@@ -370,9 +370,21 @@ def _clean_warning(value: str) -> str | None:
         "response validation passed",
         "citation field",
         "llm output does not include calculation object",
+        "gemini provider request failed",
+        "llm provider request failed",
+        "servererror:",
+        "503 unavailable",
+    )
+    hidden_fragments = (
+        "this model is currently experiencing high demand",
+        "'status': 'unavailable'",
+        '"status": "unavailable"',
     )
 
     if lowered.startswith(hidden_prefixes):
+        return None
+
+    if any(fragment in lowered for fragment in hidden_fragments):
         return None
 
     if "contract_type was not provided" in lowered:
@@ -400,3 +412,15 @@ def _range_value(start: Any, end: Any) -> str | None:
         return str(start)
 
     return f"{start}-{end}"
+
+
+def _format_source_url(*values: Any) -> str | None:
+    for value in values:
+        if value is None:
+            continue
+
+        text = str(value).strip()
+        if text.startswith(("https://", "http://")):
+            return text
+
+    return None

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from datetime import date
+import logging
 import re
 from statistics import mean
-
+from time import perf_counter
 from backend.app.core.config import Settings
 from backend.app.guardrails.chat_guardrail import validate_chat_question
 from backend.app.guardrails.input_validator import normalize_text
@@ -14,6 +15,7 @@ from backend.app.question_processing.processor import process_question
 from backend.app.question_processing.query_rewriter import is_follow_up_question
 from backend.app.query_embedding.query_embedding_service import QueryEmbeddingService
 from backend.app.repositories.chat_history_repository import ChatHistoryRepository
+from backend.app.repositories.monitoring_repository import MonitoringRepository
 from backend.app.routing.query_classifier import classify_query
 from backend.app.routing.query_router import route_query
 from backend.app.schemas.rag import Citation, ChatRequest, ChatResponse, SearchRequest, SearchResponse
@@ -35,6 +37,7 @@ from backend.app.services.supabase_auth_service import AuthenticatedUser, Supaba
 from backend.app.services.retriever_service import RetrieverService
 from backend.app.services.tax_calculation_service import TaxCalculationService
 
+logger = logging.getLogger(__name__)
 
 LLM_FALLBACK_WARNING = (
     "LLM chưa tạo được câu trả lời; hệ thống trả lời bằng nội dung trích xuất từ nguồn pháp luật."
@@ -62,6 +65,7 @@ class ChatGatewayService:
         self.conversation_store = ConversationMemoryStore()
         self.auth_service = SupabaseAuthService(settings)
         self.chat_history_repository = ChatHistoryRepository(settings)
+        self.monitoring_repository = MonitoringRepository(settings)
 
     def search(self, request: SearchRequest) -> SearchResponse:
         validation_result = self._run_guardrails(request)
@@ -173,137 +177,175 @@ class ChatGatewayService:
         )
 
     def chat(self, request: ChatRequest, authorization: str | None = None) -> ChatResponse:
-        authenticated_user = self.auth_service.authenticate_authorization_header(authorization)
-        self._assert_persistable_conversation(request, authenticated_user)
+        started_at = perf_counter()
+        authenticated_user: AuthenticatedUser | None = None
 
-        validation_result = self._run_guardrails(request)
-        if not validation_result.is_valid:
-            classification, routing = self._route_guardrail_failure(validation_result)
-            response = self.response_formatter.format_chat_response(
-                answer=validation_result.message,
-                conversation_id=request.conversation_id,
-                mode="blocked",
-                citations=[],
-                confidence=0.0,
-                warning=validation_result.reason,
-                classification=classification,
-                routing=routing,
-            )
-            return self._persist_assistant_response(response, authenticated_user)
-
-        conversation_context = self.conversation_store.get(request.conversation_id)
-        processed_question = _apply_tax_input_overrides(
-            process_question(
-                validation_result.normalized_question,
-                conversation_context=conversation_context,
-            ),
-            request,
-        )
-        classification, routing = self._classify_and_route(processed_question, conversation_context)
-
-        if routing.route == QueryRoute.REJECT:
-            response = self.response_formatter.format_chat_response(
-                answer=routing.reject_message or "Câu hỏi này nằm ngoài phạm vi hỗ trợ.",
-                conversation_id=request.conversation_id,
-                mode="rejected",
-                citations=[],
-                confidence=classification.confidence,
-                warning=routing.route.value,
-                processed_question=processed_question,
-                classification=classification,
-                routing=routing,
-            )
-            return self._persist_assistant_response(response, authenticated_user)
-
-        if routing.route == QueryRoute.CLARIFICATION_REQUIRED:
-            response = self.response_formatter.format_chat_response(
-                answer=routing.clarification_message or "Bạn vui lòng cung cấp thêm thông tin.",
-                conversation_id=request.conversation_id,
-                mode="clarification_required",
-                citations=[],
-                confidence=classification.confidence,
-                warning=routing.route.value,
-                processed_question=processed_question,
-                classification=classification,
-                routing=routing,
-            )
-            return self._persist_assistant_response(response, authenticated_user)
-
-        top_k = self._resolve_top_k(request.top_k)
-        rerank_top_k = self._resolve_rerank_top_k(request.rerank_top_k, top_k)
-        context_max_tokens = self._resolve_context_max_tokens(request.context_max_tokens)
-        search_response = self._search_valid_question(
-            request=request,
-            processed_question=processed_question,
-            classification=classification,
-            routing=routing,
-            top_k=top_k,
-            rerank_top_k=rerank_top_k,
-            context_max_tokens=context_max_tokens,
-        )
-        self.conversation_store.update(request.conversation_id, processed_question)
-        confidence = (
-            mean(citation.similarity for citation in search_response.citations)
-            if search_response.citations
-            else None
-        )
-        if search_response.prompt is None:
-            raise RuntimeError("Prompt Builder did not produce a prompt for the LLM step.")
-        response_mode = "llm"
         try:
-            llm_result = self.llm_service.generate(search_response.prompt)
-            response_validation = self.response_validation_service.validate(
-                llm_result=llm_result,
-                context=search_response.context,
-                calculation=search_response.calculation,
+            authenticated_user = self.auth_service.authenticate_authorization_header(authorization)
+            self._assert_persistable_conversation(request, authenticated_user)
+
+            validation_result = self._run_guardrails(request)
+            if not validation_result.is_valid:
+                classification, routing = self._route_guardrail_failure(validation_result)
+                response = self.response_formatter.format_chat_response(
+                    answer=validation_result.message,
+                    conversation_id=request.conversation_id,
+                    mode="blocked",
+                    citations=[],
+                    confidence=0.0,
+                    warning=validation_result.reason,
+                    classification=classification,
+                    routing=routing,
+                )
+                return self._persist_and_log_response(
+                    request=request,
+                    response=response,
+                    authenticated_user=authenticated_user,
+                    started_at=started_at,
+                )
+
+            conversation_context = self.conversation_store.get(request.conversation_id)
+            processed_question = _apply_tax_input_overrides(
+                process_question(
+                    validation_result.normalized_question,
+                    conversation_context=conversation_context,
+                ),
+                request,
+            )
+            classification, routing = self._classify_and_route(processed_question, conversation_context)
+
+            if routing.route == QueryRoute.REJECT:
+                response = self.response_formatter.format_chat_response(
+                    answer=routing.reject_message or "Câu hỏi này nằm ngoài phạm vi hỗ trợ.",
+                    conversation_id=request.conversation_id,
+                    mode="rejected",
+                    citations=[],
+                    confidence=classification.confidence,
+                    warning=routing.route.value,
+                    processed_question=processed_question,
+                    classification=classification,
+                    routing=routing,
+                )
+                return self._persist_and_log_response(
+                    request=request,
+                    response=response,
+                    authenticated_user=authenticated_user,
+                    started_at=started_at,
+                )
+
+            if routing.route == QueryRoute.CLARIFICATION_REQUIRED:
+                response = self.response_formatter.format_chat_response(
+                    answer=routing.clarification_message or "Bạn vui lòng cung cấp thêm thông tin.",
+                    conversation_id=request.conversation_id,
+                    mode="clarification_required",
+                    citations=[],
+                    confidence=classification.confidence,
+                    warning=routing.route.value,
+                    processed_question=processed_question,
+                    classification=classification,
+                    routing=routing,
+                )
+                return self._persist_and_log_response(
+                    request=request,
+                    response=response,
+                    authenticated_user=authenticated_user,
+                    started_at=started_at,
+                )
+
+            top_k = self._resolve_top_k(request.top_k)
+            rerank_top_k = self._resolve_rerank_top_k(request.rerank_top_k, top_k)
+            context_max_tokens = self._resolve_context_max_tokens(request.context_max_tokens)
+            search_response = self._search_valid_question(
+                request=request,
+                processed_question=processed_question,
+                classification=classification,
                 routing=routing,
-                effective_date=request.effective_date,
+                top_k=top_k,
+                rerank_top_k=rerank_top_k,
+                context_max_tokens=context_max_tokens,
             )
-            answer = (
-                response_validation.safe_answer
-                or llm_result.answer
-                or llm_result.raw_text
-            )
-            warning = _merge_warning_text(
-                llm_result.warning,
-                response_validation.warning,
+            self.conversation_store.update(request.conversation_id, processed_question)
+
+            confidence = (
+                mean(citation.similarity for citation in search_response.citations)
+                if search_response.citations
+                else None
             )
 
-        except LLMServiceError as exc:
-            response_mode = "llm_fallback"
-            llm_result = None
-            response_validation = None
-            answer = _build_extractive_fallback_answer(
-                search_response.citations
-            )
-            warning = _merge_warning_text(
-                LLM_FALLBACK_WARNING,
-                str(exc),
+            if search_response.prompt is None:
+                raise RuntimeError("Prompt Builder did not produce a prompt for the LLM step.")
+
+            response_mode = "llm"
+            try:
+                llm_result = self.llm_service.generate(search_response.prompt)
+                response_validation = self.response_validation_service.validate(
+                    llm_result=llm_result,
+                    context=search_response.context,
+                    calculation=search_response.calculation,
+                    routing=routing,
+                    effective_date=request.effective_date,
+                )
+                answer = (
+                    response_validation.safe_answer
+                    or llm_result.answer
+                    or llm_result.raw_text
+                )
+                warning = _merge_warning_text(
+                    llm_result.warning,
+                    response_validation.warning,
+                )
+
+            except LLMServiceError as exc:
+                response_mode = "llm_fallback"
+                llm_result = None
+                response_validation = None
+                answer = _build_extractive_fallback_answer(
+                    search_response.citations
+                )
+                logger.warning(
+                    "LLM generation failed; using extractive fallback: %s",
+                    exc,
+                )
+                warning = LLM_FALLBACK_WARNING
+
+            response = self.response_formatter.format_chat_response(
+                answer=answer,
+                conversation_id=request.conversation_id,
+                mode=response_mode,
+                citations=search_response.citations,
+                confidence=_validated_confidence(
+                    confidence,
+                    response_validation.is_valid if response_validation else True,
+                ),
+                warning=warning,
+                processed_question=processed_question,
+                classification=classification,
+                routing=routing,
+                query_embedding=search_response.query_embedding,
+                retrieval=search_response.retrieval,
+                reranking=search_response.reranking,
+                calculation=search_response.calculation,
+                context=search_response.context,
+                prompt=search_response.prompt,
+                llm=llm_result,
+                response_validation=response_validation,
             )
 
-        response = self.response_formatter.format_chat_response(
-            answer=answer,
-            conversation_id=request.conversation_id,
-            mode=response_mode,
-            citations=search_response.citations,
-            confidence=_validated_confidence(
-                confidence,
-                response_validation.is_valid if response_validation else True,
-            ),
-            warning=warning,
-            processed_question=processed_question,
-            classification=classification,
-            routing=routing,
-            query_embedding=search_response.query_embedding,
-            retrieval=search_response.retrieval,
-            reranking=search_response.reranking,
-            calculation=search_response.calculation,
-            context=search_response.context,
-            prompt=search_response.prompt,
-            llm=llm_result,
-            response_validation=response_validation,
-        )
-        return self._persist_assistant_response(response, authenticated_user)
+            return self._persist_and_log_response(
+                request=request,
+                response=response,
+                authenticated_user=authenticated_user,
+                started_at=started_at,
+            )
+
+        except Exception as exc:
+            self._safe_log_error(
+                request=request,
+                authenticated_user=authenticated_user,
+                started_at=started_at,
+                exc=exc,
+            )
+            raise
 
     def _assert_persistable_conversation(
         self,
@@ -331,6 +373,53 @@ class ChatGatewayService:
             response=response,
         )
         return response.model_copy(update={"assistant_message_id": assistant_message_id})
+
+    def _persist_and_log_response(
+        self,
+        *,
+        request: ChatRequest,
+        response: ChatResponse,
+        authenticated_user: AuthenticatedUser | None,
+        started_at: float,
+    ) -> ChatResponse:
+        persisted_response = self._persist_assistant_response(
+            response=response,
+            authenticated_user=authenticated_user,
+        )
+
+        response_time_ms = int((perf_counter() - started_at) * 1000)
+
+        try:
+            self.monitoring_repository.insert_query_log(
+                request=request,
+                response=persisted_response,
+                user_id=authenticated_user.id if authenticated_user else None,
+                response_time_ms=response_time_ms,
+            )
+        except Exception:
+            logger.exception("Failed to write query monitoring log")
+
+        return persisted_response
+
+    def _safe_log_error(
+        self,
+        *,
+        request: ChatRequest,
+        authenticated_user: AuthenticatedUser | None,
+        started_at: float,
+        exc: Exception,
+    ) -> None:
+        response_time_ms = int((perf_counter() - started_at) * 1000)
+
+        try:
+            self.monitoring_repository.insert_query_error(
+                request=request,
+                user_id=authenticated_user.id if authenticated_user else None,
+                response_time_ms=response_time_ms,
+                exc=exc,
+            )
+        except Exception:
+            logger.exception("Failed to write query error monitoring log")
 
     def _run_guardrails(self, request: SearchRequest) -> ValidationResult:
         validation_result = validate_chat_question(request.question)

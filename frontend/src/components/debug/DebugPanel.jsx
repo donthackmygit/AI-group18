@@ -23,8 +23,8 @@ export default function DebugPanel({ payload, onClose }) {
             <p className="eyebrow">Debug</p>
             <h2>Chi tiết pipeline</h2>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Đóng">
-            X
+          <button className="drawer-close-button" type="button" onClick={onClose} aria-label="Đóng">
+            ×
           </button>
         </div>
 

@@ -9,5 +9,5 @@
   "batch_size": 100,
   "embeddings_path": "data/processed/embeddings/chunk_embeddings.npy",
   "chunks_metadata_path": "data/processed/embeddings/chunks_metadata.json",
-  "uploaded_at": "2026-06-11T21:18:07"
+  "uploaded_at": "2026-06-11T23:15:00"
 }

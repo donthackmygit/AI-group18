@@ -114,6 +114,7 @@ class RetrieverService:
 
     @staticmethod
     def _row_to_citation(index: int, row: dict[str, Any]) -> Citation:
+        metadata = row.get("metadata") or {}
         return Citation(
             citation_id=f"SOURCE_{index}",
             chunk_id=str(row.get("chunk_id") or ""),
@@ -127,7 +128,7 @@ class RetrieverService:
             article_title=row.get("article_title"),
             chapter=row.get("chapter"),
             section=row.get("section"),
-            source_url=row.get("source_url"),
+            source_url=_first_http_url(row.get("source_url"), metadata.get("source_url")),
             local_path=row.get("local_path"),
             status=row.get("status"),
             issue_date=row.get("issue_date"),
@@ -135,7 +136,7 @@ class RetrieverService:
             expiry_date=row.get("expiry_date"),
             similarity=float(row.get("similarity") or 0.0),
             content=str(row.get("content") or ""),
-            metadata=row.get("metadata") or {},
+            metadata=metadata,
             retrieval_rank=index,
         )
 
@@ -167,3 +168,15 @@ def _merge_priority_rows(
             break
 
     return merged
+
+
+def _first_http_url(*values: Any) -> str | None:
+    for value in values:
+        if value is None:
+            continue
+
+        text = str(value).strip()
+        if text.startswith(("https://", "http://")):
+            return text
+
+    return None
