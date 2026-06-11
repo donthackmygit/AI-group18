@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import json
 import re
 from typing import Any
 
+from backend.app.core.config import Settings
 from backend.app.schemas.context import ContextBuildResult
 from backend.app.schemas.llm import LLMGenerationResult
 from backend.app.schemas.prompt import PromptBuildResult
@@ -33,10 +35,14 @@ CONFIDENCE_LABELS = {
     "medium": 0.65,
     "high": 0.85,
 }
+INLINE_SOURCE_MARKER_RE = re.compile(
+    r"\s*\[(?:SOURCE|QUEST|QUESTION|CITATION)_\d+\]\s*",
+    flags=re.IGNORECASE,
+)
 
 
 class ResponseFormatterService:
-    def __init__(self, settings):
+    def __init__(self, settings: Settings) -> None:
         self.settings = settings
 
     def format_chat_response(
@@ -124,7 +130,9 @@ def _format_answer(answer: str | None) -> str:
         return EMPTY_ANSWER
 
     parsed_answer = _extract_answer_from_json(normalized)
-    return parsed_answer or normalized
+    cleaned = _remove_inline_source_markers(parsed_answer or normalized)
+
+    return cleaned or EMPTY_ANSWER
 
 
 def _extract_answer_from_json(value: str) -> str | None:
@@ -163,6 +171,15 @@ def _strip_json_markdown_fence(value: str) -> str | None:
         return None
 
     return match.group(1).strip()
+
+
+def _remove_inline_source_markers(value: str) -> str:
+    cleaned = INLINE_SOURCE_MARKER_RE.sub(" ", value)
+    cleaned = re.sub(r"\s+([,.;:!?])", r"\1", cleaned)
+    cleaned = re.sub(r"\(\s*\)", "", cleaned)
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+    cleaned = re.sub(r"\n\s+", "\n", cleaned)
+    return cleaned.strip()
 
 
 def _format_citation(citation: Citation) -> FormattedCitation:
@@ -213,13 +230,17 @@ def _format_clause(metadata: dict[str, Any]) -> str | None:
     )
     if value is None:
         return None
+
     normalized = str(value).strip()
     if not normalized:
         return None
+
     if normalized.casefold().startswith(("khoản", "khoan")):
         return normalized
+
     if re.fullmatch(r"\d+(?:-\d+)?", normalized):
         return f"Khoản {normalized}"
+
     return normalized
 
 
@@ -227,15 +248,18 @@ def _format_content(content: str) -> str:
     normalized = re.sub(r"\s+", " ", content).strip()
     if len(normalized) <= MAX_CITATION_CONTENT_CHARS:
         return normalized
+
     trimmed = normalized[:MAX_CITATION_CONTENT_CHARS].rstrip()
     if " " in trimmed:
         trimmed = trimmed.rsplit(" ", 1)[0].rstrip()
+
     return f"{trimmed}..."
 
 
 def _format_calculation(calculation: TaxCalculationResult | None) -> FormattedCalculation | None:
     if calculation is None:
         return None
+
     return FormattedCalculation(
         taxable_income=calculation.taxable_income,
         personal_deduction=calculation.personal_deduction,
@@ -251,10 +275,13 @@ def _format_calculation(calculation: TaxCalculationResult | None) -> FormattedCa
 
 def _format_calculation_step(step: TaxCalculationStep) -> str:
     parts = [step.label]
+
     if step.amount is not None:
         parts.append(f"{_format_money(step.amount)} VND")
+
     if step.formula:
         parts.append(step.formula)
+
     return " - ".join(parts)
 
 
@@ -267,10 +294,13 @@ def _format_confidence(
     llm: LLMGenerationResult | None,
 ) -> float | None:
     value = confidence
+
     if value is None and llm and llm.confidence_label:
         value = CONFIDENCE_LABELS.get(llm.confidence_label.strip().casefold())
+
     if value is None:
         return None
+
     return round(min(max(float(value), 0.0), 1.0), 4)
 
 
@@ -305,15 +335,19 @@ def _first_text(*values: Any) -> str | None:
     for value in values:
         if value is None:
             continue
+
         text = str(value).strip()
         if text:
             return text
+
     return None
 
 
 def _range_value(start: Any, end: Any) -> str | None:
     if start is None or start == "":
         return None
+
     if end is None or end == "" or str(end) == str(start):
         return str(start)
+
     return f"{start}-{end}"

@@ -24,7 +24,8 @@ BASE_ANSWER_RULES = [
     "Chỉ trả lời dựa trên tài liệu được cung cấp trong phần CONTEXT.",
     "Không tự tạo ra mức thuế, điều luật, khoản, điểm hoặc số hiệu văn bản.",
     "Nếu tài liệu không đủ để trả lời, hãy nói rõ rằng chưa tìm thấy đủ căn cứ pháp lý.",
-    "Mỗi kết luận pháp lý cần đi kèm nguồn trích dẫn dạng [SOURCE_n].",
+    "Không chèn mã nguồn như [SOURCE_1], [SOURCE_2] trực tiếp trong trường answer.",
+    "Nguồn trích dẫn phải đưa vào trường citations của JSON, không đưa vào nội dung answer.",
     "Ưu tiên văn bản đang có hiệu lực khi các nguồn có nội dung khác nhau.",
     "Không thay thế ý kiến của chuyên gia thuế hoặc cơ quan quản lý thuế.",
 ]
@@ -128,7 +129,10 @@ def _output_format(requires_tax_calculation: bool) -> dict[str, object]:
         calculation_schema = None
 
     return {
-        "answer": "string",
+        "answer": (
+            "string - nội dung trả lời cho người dùng, không chứa [SOURCE_1], "
+            "[SOURCE_2] hoặc các mã citation inline"
+        ),
         "citations": [
             {
                 "citation_id": "SOURCE_1",
@@ -180,7 +184,8 @@ def _build_user_prompt(
             "SOURCE ĐƯỢC PHÉP TRÍCH DẪN:\n" + source_text,
             "QUY TẮC TRẢ LỜI:\n" + rules_text,
             "ĐỊNH DẠNG ĐẦU RA:\n"
-            "Chỉ trả về một JSON object hợp lệ theo cấu trúc sau, không bọc trong Markdown:\n"
+            "Chỉ trả về một JSON object hợp lệ theo cấu trúc sau, không bọc trong Markdown. "
+            "Trường answer không được chứa citation inline như [SOURCE_1]; citation phải nằm trong trường citations:\n"
             + output_json,
         ]
     )

@@ -81,7 +81,7 @@ class LLMService:
                 "QUY TẮC TRẢ LỜI:\n"
                 "1. Chỉ trả lời dựa trên tài liệu được cung cấp.\n"
                 "2. Không tự tạo điều luật, mức thuế hoặc số hiệu văn bản.\n"
-                "3. Mỗi kết luận quan trọng phải kèm mã nguồn như [SOURCE_1].\n"
+                "3. Không chèn mã nguồn như [SOURCE_1] trực tiếp trong câu trả lời.\n"
                 "4. Nếu tài liệu không đủ, phải nói rõ chưa đủ căn cứ.\n"
                 "5. Trả lời bằng tiếng Việt, rõ ràng và dễ hiểu.\n"
                 "6. Không tự thực hiện phép tính thuế nếu chưa có kết quả từ Tax Calculation Service.",
@@ -97,7 +97,7 @@ class LLMService:
 
     def _generate_with_gemini(self, system_instruction: str, user_content: str) -> str:
         genai, types = _load_gemini_dependencies()
-        client = self._get_client(genai)
+        client = self._get_client(genai, types)
 
         try:
             response = client.models.generate_content(
@@ -107,30 +107,49 @@ class LLMService:
                     system_instruction=system_instruction,
                     temperature=self.settings.llm_temperature,
                     max_output_tokens=self.settings.llm_max_output_tokens,
-                    http_options=types.HttpOptions(
-                        timeout=self.settings.llm_timeout_ms
-                    ),
                 ),
             )
         except Exception as exc:
             raise LLMProviderError(
-                "Gemini provider request failed."
+                _exception_message("Gemini provider request failed", exc)
             ) from exc
 
-        response_text = getattr(response, "text", None)
+        try:
+            response_text = getattr(response, "text", None)
+        except Exception as exc:
+            raise LLMProviderError(
+                _exception_message("Gemini response text extraction failed", exc)
+            ) from exc
+
         if not response_text or not response_text.strip():
-            raise LLMEmptyResponseError("LLM did not return text content.")
+            detail = _gemini_empty_response_detail(response)
+            raise LLMEmptyResponseError(
+                detail or "LLM did not return text content."
+            )
 
         return response_text.strip()
 
-    def _get_client(self, genai: Any) -> Any:
-        if self._client is None:
+    def _get_client(self, genai: Any, types: Any) -> Any:
+        if self._client is not None:
+            return self._client
+
+        try:
+            self._client = genai.Client(
+                api_key=self.settings.gemini_api_key,
+                http_options=types.HttpOptions(timeout=self.settings.llm_timeout_ms),
+            )
+        except TypeError:
+            # Một số version SDK có thể không nhận http_options ở Client.
             try:
                 self._client = genai.Client(api_key=self.settings.gemini_api_key)
             except Exception as exc:
                 raise LLMProviderError(
-                    "Failed to initialize Gemini client."
+                    _exception_message("Failed to initialize Gemini client", exc)
                 ) from exc
+        except Exception as exc:
+            raise LLMProviderError(
+                _exception_message("Failed to initialize Gemini client", exc)
+            ) from exc
 
         return self._client
 
@@ -237,3 +256,30 @@ def _extract_citation_refs(text: str, allowed_source_ids: list[str]) -> list[dic
         seen.add(ref)
 
     return citations
+
+
+def _exception_message(prefix: str, exc: Exception) -> str:
+    detail = str(exc).strip()
+    exc_name = exc.__class__.__name__
+
+    if detail:
+        return f"{prefix}: {exc_name}: {detail}"
+
+    return f"{prefix}: {exc_name}"
+
+
+def _gemini_empty_response_detail(response: Any) -> str | None:
+    details: list[str] = []
+
+    prompt_feedback = getattr(response, "prompt_feedback", None)
+    if prompt_feedback is not None:
+        details.append(f"prompt_feedback={prompt_feedback}")
+
+    candidates = getattr(response, "candidates", None)
+    if candidates is not None:
+        details.append(f"candidates={candidates}")
+
+    if not details:
+        return None
+
+    return "LLM did not return text content. " + " | ".join(details)
