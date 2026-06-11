@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 import re
 from statistics import mean
 
@@ -38,6 +39,11 @@ from backend.app.services.tax_calculation_service import TaxCalculationService
 LLM_FALLBACK_WARNING = (
     "LLM chưa tạo được câu trả lời; hệ thống trả lời bằng nội dung trích xuất từ nguồn pháp luật."
 )
+
+PERSONAL_DEDUCTION_DOCUMENT_NUMBERS = {
+    "109/2025/QH15",
+    "954/2020/UBTVQH14",
+}
 
 
 class ChatGatewayService:
@@ -473,7 +479,7 @@ def _build_extractive_fallback_answer(citations: list[Citation]) -> str:
         snippets.append(f"- {content} [{citation.citation_id}]")
 
     return (
-        "Gemini chưa phản hồi kịp. Dưới đây là nội dung pháp luật liên quan được "
+        "LLM chưa tạo được câu trả lời. Dưới đây là nội dung pháp luật liên quan được "
         "trích xuất từ nguồn đã tìm thấy:\n"
         + "\n".join(snippets)
     )
@@ -482,8 +488,9 @@ def _build_extractive_fallback_answer(citations: list[Citation]) -> str:
 def _personal_deduction_answer(citations: list[Citation]) -> str | None:
     preferred_citations = sorted(
         citations,
-        key=lambda citation: 0 if citation.document_number == "954/2020/UBTVQH14" else 1,
+        key=_personal_deduction_sort_key,
     )
+
     for citation in preferred_citations:
         content = _compact_text(citation.content)
         personal_match = re.search(
@@ -511,6 +518,37 @@ def _personal_deduction_answer(citations: list[Citation]) -> str | None:
         return answer
 
     return None
+
+
+def _personal_deduction_sort_key(citation: Citation) -> tuple[int, int, int, int]:
+    status_rank = 0 if citation.status == "effective" else 1
+    authority_rank = (
+        0
+        if citation.document_number in PERSONAL_DEDUCTION_DOCUMENT_NUMBERS
+        else 1
+    )
+    effective_date_rank = -_date_ordinal(citation.effective_date)
+    source_rank = citation.rerank_rank or citation.retrieval_rank or 9999
+
+    return (
+        status_rank,
+        authority_rank,
+        effective_date_rank,
+        source_rank,
+    )
+
+
+def _date_ordinal(value: object) -> int:
+    if isinstance(value, date):
+        return value.toordinal()
+
+    if isinstance(value, str) and value.strip():
+        try:
+            return date.fromisoformat(value[:10]).toordinal()
+        except ValueError:
+            return 0
+
+    return 0
 
 
 def _compact_text(text: str) -> str:

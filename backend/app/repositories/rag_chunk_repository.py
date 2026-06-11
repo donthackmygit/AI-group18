@@ -80,11 +80,42 @@ PERSONAL_DEDUCTION_SQL = """
         1.0::double precision as similarity
     from rag.chunks as c
     where
-        c.document_number = '954/2020/UBTVQH14'
+        (
+            c.content ilike '%%giảm trừ gia cảnh%%'
+            or c.article_title ilike '%%giảm trừ gia cảnh%%'
+            or c.document_title ilike '%%giảm trừ gia cảnh%%'
+            or c.content ilike '%%mức giảm trừ đối với%%'
+            or c.content ilike '%%người phụ thuộc%%'
+            or c.metadata::text ilike '%%giảm trừ gia cảnh%%'
+        )
+        and (%(status)s::text is null or c.status = %(status)s::text)
+        and (
+            %(effective_date)s::date is null
+            or c.effective_date is null
+            or c.effective_date <= %(effective_date)s::date
+        )
+        and (
+            %(effective_date)s::date is null
+            or c.expiry_date is null
+            or c.expiry_date >= %(effective_date)s::date
+        )
     order by
         case
-            when c.article = 'Điều 1' then 0
+            when c.status = 'effective' then 0
             else 1
+        end,
+        case
+            when c.article_title ilike '%%giảm trừ gia cảnh%%' then 0
+            when c.article ilike '%%Điều 10%%' then 1
+            when c.article ilike '%%Điều 1%%' then 2
+            else 3
+        end,
+        coalesce(c.effective_date, c.issue_date, date '1900-01-01') desc,
+        case
+            when c.document_type ilike '%%luật%%' then 0
+            when c.document_type ilike '%%nghị quyết%%' then 1
+            when c.document_type ilike '%%thông tư%%' then 2
+            else 3
         end,
         c.chunk_id
     limit %(top_k)s;
@@ -173,6 +204,7 @@ class RagChunkRepository:
                 "Missing database dependency. Install project requirements before running retrieval: "
                 "python -m pip install -r requirements.txt"
             ) from exc
+
         return psycopg, dict_row, Jsonb
 
     @staticmethod
@@ -184,4 +216,5 @@ class RagChunkRepository:
                 "Missing pgvector dependency. Install project requirements before running retrieval: "
                 "python -m pip install -r requirements.txt"
             ) from exc
+
         register_vector(conn)

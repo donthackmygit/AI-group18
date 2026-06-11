@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import unicodedata
 from dataclasses import dataclass
+from datetime import date
 
 from backend.app.schemas.query_route import QueryClassificationResult, QueryIntent
 from backend.app.schemas.question_processing import ProcessedQuestion
@@ -31,6 +32,11 @@ STOPWORDS = {
     "người",
     "thuế",
     "tncn",
+}
+
+PERSONAL_DEDUCTION_DOCUMENT_NUMBERS = {
+    "109/2025/QH15",
+    "954/2020/UBTVQH14",
 }
 
 
@@ -78,6 +84,7 @@ class RerankerService:
             )
             for citation in citations
         ]
+
         scored.sort(
             key=lambda item: (
                 item.candidate.rerank_score,
@@ -118,7 +125,7 @@ class RerankerService:
             candidates=candidates,
             note=(
                 "Heuristic re-ranking combines vector similarity, keyword overlap, topic match, "
-                "legal metadata boosts, and effective document status."
+                "legal metadata boosts, effective document status, and personal deduction authority boosts."
             ),
         )
 
@@ -158,12 +165,12 @@ class RerankerService:
             if tax_score:
                 reasons.append("tax_calculation_terms")
 
-        if (
-            _is_personal_deduction_topic(processed_question.topic)
-            and citation.document_number == "954/2020/UBTVQH14"
-        ):
-            metadata_boost += 0.15
-            reasons.append("personal_deduction_current_resolution")
+        if _is_personal_deduction_topic(processed_question.topic):
+            personal_boost, personal_reasons = _personal_deduction_metadata_boost(
+                citation
+            )
+            metadata_boost += personal_boost
+            reasons.extend(personal_reasons)
 
         score = (
             0.65 * citation.similarity
@@ -195,12 +202,14 @@ def _tokenize(text: str) -> set[str]:
 def _overlap_score(query_tokens: set[str], candidate_tokens: set[str]) -> float:
     if not query_tokens or not candidate_tokens:
         return 0.0
+
     return len(query_tokens & candidate_tokens) / len(query_tokens)
 
 
 def _topic_score(topic: str | None, candidate_tokens: set[str]) -> float:
     if not topic:
         return 0.0
+
     topic_tokens = _tokenize(topic)
     return _overlap_score(topic_tokens, candidate_tokens)
 
@@ -212,9 +221,41 @@ def _extract_article_numbers(text: str) -> set[str]:
 def _is_personal_deduction_topic(topic: str | None) -> bool:
     if not topic:
         return False
+
     normalized = unicodedata.normalize("NFD", topic.casefold())
     ascii_text = "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
     return "giam tru gia canh" in ascii_text
+
+
+def _personal_deduction_metadata_boost(citation: Citation) -> tuple[float, list[str]]:
+    boost = 0.0
+    reasons: list[str] = []
+
+    text = _ascii_text(_citation_text(citation))
+    document_number = citation.document_number or ""
+
+    if document_number in PERSONAL_DEDUCTION_DOCUMENT_NUMBERS:
+        boost += 0.08
+        reasons.append("personal_deduction_authority_document")
+
+    if "giam tru gia canh" in text:
+        boost += 0.06
+        reasons.append("personal_deduction_content_match")
+
+    if "nguoi phu thuoc" in text:
+        boost += 0.03
+        reasons.append("dependent_deduction_content_match")
+
+    if citation.status == "effective":
+        boost += 0.02
+        reasons.append("personal_deduction_effective_status")
+
+    effective_year = _date_year(citation.effective_date)
+    if effective_year and effective_year >= 2026:
+        boost += 0.04
+        reasons.append("personal_deduction_newer_effective_rule")
+
+    return min(boost, 0.18), reasons
 
 
 def _citation_text(citation: Citation) -> str:
@@ -267,3 +308,21 @@ def _metadata_boost(citation: Citation, article_numbers: set[str]) -> tuple[floa
         reasons.append("source_url_present")
 
     return min(boost, 0.15), reasons
+
+
+def _ascii_text(value: str) -> str:
+    normalized = unicodedata.normalize("NFD", value.casefold())
+    return "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+
+
+def _date_year(value: object) -> int | None:
+    if isinstance(value, date):
+        return value.year
+
+    if isinstance(value, str) and value.strip():
+        try:
+            return date.fromisoformat(value[:10]).year
+        except ValueError:
+            return None
+
+    return None
