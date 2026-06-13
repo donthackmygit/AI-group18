@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from backend.app.core.config import Settings
+from backend.app.core.database import get_database_connection
 from backend.app.schemas.monitoring import (
     FeedbackSummary,
     IngestionLogItem,
@@ -226,8 +227,7 @@ class MonitoringRepository:
             "citations": Jsonb([_dump_model(citation) for citation in response.citations]),
         }
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(INSERT_QUERY_LOG_SQL, params)
                 row = cur.fetchone()
@@ -243,8 +243,6 @@ class MonitoringRepository:
 
             conn.commit()
             return query_log_id
-        finally:
-            conn.close()
 
     def insert_query_error(
         self,
@@ -265,15 +263,12 @@ class MonitoringRepository:
             "request_payload": Jsonb(_dump_model(request)),
         }
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(INSERT_QUERY_ERROR_SQL, params)
                 row = cur.fetchone()
             conn.commit()
             return str(row["id"])
-        finally:
-            conn.close()
 
     def list_query_logs(
         self,
@@ -327,13 +322,10 @@ class MonitoringRepository:
             offset %(offset)s;
         """
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(sql, params)
                 rows = cur.fetchall()
-        finally:
-            conn.close()
 
         return QueryLogListResponse(
             items=[
@@ -410,8 +402,7 @@ class MonitoringRepository:
             where created_at >= %(since)s;
         """
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(metrics_sql, {"since": since})
                 metrics = cur.fetchone() or {}
@@ -424,8 +415,6 @@ class MonitoringRepository:
 
                 cur.execute(feedback_sql, {"since": since})
                 feedback = cur.fetchone() or {}
-        finally:
-            conn.close()
 
         return MonitoringDashboardResponse(
             days=days,
@@ -492,13 +481,10 @@ class MonitoringRepository:
             offset %(offset)s;
         """
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(sql, params)
                 rows = cur.fetchall()
-        finally:
-            conn.close()
 
         return IngestionLogListResponse(
             items=[IngestionLogItem(**row) for row in rows],

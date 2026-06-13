@@ -1,10 +1,22 @@
 from __future__ import annotations
 
 import re
+import unicodedata
+
+
+def _ascii_fold(text: str) -> str:
+    text = text.replace("đ", "d").replace("Đ", "D")
+    normalized = unicodedata.normalize("NFD", text.casefold())
+    return "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+
+
+def _contains_any(text: str, keywords: list[str]) -> bool:
+    q = _ascii_fold(text)
+    return any(_ascii_fold(keyword) in q for keyword in keywords)
 
 
 def classify_intent(question: str) -> str:
-    q = question.casefold()
+    q = _ascii_fold(question)
 
     definition_keywords = [
         "là gì",
@@ -54,21 +66,39 @@ def classify_intent(question: str) -> str:
         "thu nhập chịu thuế",
     ]
 
-    if any(keyword in q for keyword in definition_keywords):
+    if _contains_any(q, definition_keywords):
         return "DEFINITION"
     if any(re.search(pattern, q) for pattern in legal_lookup_patterns):
         return "LEGAL_LOOKUP"
-    if any(keyword in q for keyword in procedure_keywords):
+    if _contains_any(q, procedure_keywords):
         return "PROCEDURE_GUIDE"
-    if any(keyword in q for keyword in legal_lookup_keywords):
+    if _contains_any(q, legal_lookup_keywords):
         return "LEGAL_LOOKUP"
-    if any(keyword in q for keyword in tax_calculation_keywords):
+    if _contains_any(q, tax_calculation_keywords):
         return "TAX_CALCULATION"
     return "GENERAL_TNCN_QUERY"
 
 
 def detect_topic(question: str) -> str:
     q = question.casefold()
+    folded_q = _ascii_fold(question)
+
+    if "giam tru gia canh" in folded_q or "nguoi phu thuoc" in folded_q:
+        return "Giảm trừ gia cảnh"
+    if "tien luong" in folded_q or "tien cong" in folded_q or "luong" in folded_q:
+        return "Thu nhập từ tiền lương, tiền công"
+    if "quyet toan" in folded_q:
+        return "Quyết toán thuế TNCN"
+    if "hoan thue" in folded_q:
+        return "Hoàn thuế TNCN"
+    if "khong cu tru" in folded_q or "cu tru" in folded_q:
+        return "Cá nhân cư trú và không cư trú"
+    if "bieu thue" in folded_q or "thue suat" in folded_q or "luy tien" in folded_q:
+        return "Biểu thuế lũy tiến từng phần"
+    if "mien thue" in folded_q:
+        return "Thu nhập miễn thuế"
+    if "bao hiem" in folded_q:
+        return "Các khoản bảo hiểm bắt buộc"
 
     if "giảm trừ gia cảnh" in q or "người phụ thuộc" in q:
         return "Giảm trừ gia cảnh"

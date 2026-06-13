@@ -1,4 +1,11 @@
-export default function Header({ health, healthError, isChecking, onRefresh }) {
+export default function Header({
+  eyebrow = "Chatbot RAG Thuế TNCN",
+  title = "Trợ lý hỏi đáp Thuế thu nhập cá nhân",
+  health,
+  healthError,
+  isChecking,
+  onRefresh,
+}) {
   const statusLabel = health
     ? `Backend sẵn sàng - ${health.app_version}`
     : healthError || "Đang kiểm tra backend";
@@ -6,8 +13,8 @@ export default function Header({ health, healthError, isChecking, onRefresh }) {
   return (
     <header className="app-header">
       <div>
-        <p className="eyebrow">Chatbot RAG Thuế TNCN</p>
-        <h1>Trợ lý hỏi đáp Thuế thu nhập cá nhân</h1>
+        <p className="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
       </div>
       <div className="header-status">
         <span

@@ -9,6 +9,9 @@ class ExtractedEntities(BaseModel):
     dependents: int | None = None
     insurance: int | None = None
     resident_status: str | None = None
+    nationality: str | None = None
+    work_start_month: int | None = None
+    days_in_vietnam: int | None = None
     tax_year: int | None = None
 
 

@@ -12,7 +12,7 @@ import {
 import { createId, titleFromQuestion } from "../utils/conversationId.js";
 import { useSupabaseAuth } from "./useSupabaseAuth.js";
 
-const DEFAULT_CONVERSATION_TITLE = "Cuoc tro chuyen moi";
+const DEFAULT_CONVERSATION_TITLE = "Cuộc trò chuyện mới";
 
 export function useChat() {
   const auth = useSupabaseAuth();

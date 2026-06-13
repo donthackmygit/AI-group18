@@ -22,9 +22,20 @@ class ConversationMemoryStore:
         if not conversation_id:
             return
         with self._lock:
+            current = self._items.get(conversation_id) or {}
+            current_entities = current.get("last_entities") or {}
+            next_entities = processed_question.entities.model_dump()
+            merged_entities = {
+                **current_entities,
+                **{
+                    key: value
+                    for key, value in next_entities.items()
+                    if value is not None
+                },
+            }
             self._items[conversation_id] = {
                 "last_standalone_question": processed_question.standalone_question,
-                "last_entities": processed_question.entities.model_dump(),
-                "last_intent": processed_question.intent,
-                "last_topic": processed_question.topic,
+                "last_entities": merged_entities,
+                "last_intent": processed_question.intent or current.get("last_intent"),
+                "last_topic": processed_question.topic or current.get("last_topic"),
             }

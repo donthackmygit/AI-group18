@@ -15,7 +15,7 @@ export async function listConversations(userId) {
   return (data || []).map(mapConversationRow);
 }
 
-export async function createConversation(userId, title = "Cuoc tro chuyen moi") {
+export async function createConversation(userId, title = "Cuộc trò chuyện mới") {
   const client = requireSupabaseClient();
   const { data, error } = await client
     .from("conversations")

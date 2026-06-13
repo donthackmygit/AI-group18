@@ -165,11 +165,11 @@ def _build_user_prompt(
 ) -> str:
     rules_text = "\n".join(f"{index}. {rule}" for index, rule in enumerate(answer_rules, start=1))
     source_text = ", ".join(source_ids) if source_ids else "Không có SOURCE hợp lệ."
-    output_json = json.dumps(output_format, ensure_ascii=False, indent=2)
+    output_json = json.dumps(output_format, ensure_ascii=False, separators=(",", ":"))
     entities_json = json.dumps(
         processed_question.entities.model_dump(exclude_none=True),
         ensure_ascii=False,
-        indent=2,
+        separators=(",", ":"),
     )
     calculation_text = _calculation_text(calculation)
 
@@ -179,13 +179,10 @@ def _build_user_prompt(
             "THÔNG TIN PHÂN TÍCH:\n"
             f"- Intent: {classification.intent.value}\n"
             f"- Topic: {processed_question.topic or classification.topic or 'Không xác định'}\n"
-            f"- Route: {routing.route.value}\n"
-            f"- Retrieval required: {routing.retrieval_required}\n"
-            f"- Tax calculation required: {routing.tax_calculation_required}\n"
             f"- Missing fields: {', '.join(routing.missing_fields) if routing.missing_fields else 'Không có'}\n"
-            f"- Entities:\n{entities_json}",
+            f"- Entities: {entities_json}",
             "CONTEXT:\n" + context_text,
-            "KẾT QUẢ TAX CALCULATION SERVICE:\n" + calculation_text,
+            *(["KẾT QUẢ TAX CALCULATION SERVICE:\n" + calculation_text] if routing.tax_calculation_required else []),
             "SOURCE ĐƯỢC PHÉP TRÍCH DẪN:\n" + source_text,
             "QUY TẮC TRẢ LỜI:\n" + rules_text,
             "ĐỊNH DẠNG ĐẦU RA:\n"
@@ -209,5 +206,5 @@ def _calculation_text(calculation: TaxCalculationResult | None) -> str:
     return json.dumps(
         calculation.model_dump(mode="json", exclude_none=True),
         ensure_ascii=False,
-        indent=2,
+        separators=(",", ":"),
     )

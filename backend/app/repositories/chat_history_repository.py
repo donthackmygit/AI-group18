@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from backend.app.core.config import Settings
+from backend.app.core.database import get_database_connection
 from backend.app.schemas.rag import ChatResponse
 
 
@@ -42,8 +43,7 @@ class ChatHistoryRepository:
 
     def assert_user_owns_conversation(self, conversation_id: str, user_id: str) -> None:
         psycopg, dict_row, _ = self._load_database_dependencies()
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     VERIFY_CONVERSATION_SQL,
@@ -52,8 +52,6 @@ class ChatHistoryRepository:
                 row = cur.fetchone()
             if not row:
                 raise PermissionError("Conversation does not exist or does not belong to this user.")
-        finally:
-            conn.close()
 
     def insert_assistant_message(
         self,
@@ -72,15 +70,12 @@ class ChatHistoryRepository:
             "retrieval_metadata": Jsonb(metadata),
         }
 
-        conn = psycopg.connect(**self.settings.database_kwargs())
-        try:
+        with get_database_connection(self.settings) as conn:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(INSERT_ASSISTANT_MESSAGE_SQL, params)
                 row = cur.fetchone()
             conn.commit()
             return str(row["id"])
-        finally:
-            conn.close()
 
     @staticmethod
     def _load_database_dependencies() -> tuple[Any, Any, Any]:

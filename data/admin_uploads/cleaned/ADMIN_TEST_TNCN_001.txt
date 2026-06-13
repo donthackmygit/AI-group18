@@ -1,0 +1,11 @@
+THONG BAO NOI BO VE HUONG DAN THU NGHIEM THUE TNCN
+
+Dieu 1. Pham vi ap dung
+Tai lieu mau nay dung de kiem thu chuc nang quan ly tai lieu cua he thong chatbot Thue thu nhap ca nhan.
+
+Dieu 2. Noi dung can tra cuu
+Thu nhap tu tien luong, tien cong cua ca nhan cu tru la thu nhap chiu thue TNCN theo quy dinh phap luat hien hanh.
+Khi tinh thue tu tien luong, tien cong, nguoi nop thue duoc tinh cac khoan giam tru phu hop neu dap ung dieu kien.
+
+Dieu 3. Hieu luc thu nghiem
+Tai lieu nay chi dung cho kiem thu pipeline upload, trich xuat, tao chunk va embedding. Khong su dung lam can cu phap ly chinh thuc.

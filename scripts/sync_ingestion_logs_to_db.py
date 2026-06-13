@@ -215,9 +215,7 @@ def _resolve_document_id(row: dict[str, str]) -> str | None:
 def _normalize_status(value: str) -> str:
     status = (value or "").strip().lower()
 
-    if status in {"ok"}:
-        return "ok"
-    if status in {"success"}:
+    if status in {"ok", "success"}:
         return "success"
     if status in {"warning", "empty"}:
         return status

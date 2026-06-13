@@ -6,6 +6,7 @@ from typing import Any
 import numpy as np
 
 from backend.app.core.config import Settings
+from backend.app.core.database import get_database_connection
 
 
 SEARCH_SQL = """
@@ -145,23 +146,22 @@ class RagChunkRepository:
         }
 
         try:
-            conn = psycopg.connect(**self.settings.database_kwargs())
+            conn_context = get_database_connection(self.settings)
         except Exception as exc:
             raise RuntimeError(
                 "Could not connect to Supabase PostgreSQL. Check network access and database settings."
             ) from exc
 
         try:
-            self._register_vector(conn)
-            with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(SEARCH_SQL, params)
-                return list(cur.fetchall())
+            with conn_context as conn:
+                self._register_vector(conn)
+                with conn.cursor(row_factory=dict_row) as cur:
+                    cur.execute(SEARCH_SQL, params)
+                    return list(cur.fetchall())
         except RuntimeError:
             raise
         except Exception as exc:
             raise RuntimeError("Supabase vector search failed.") from exc
-        finally:
-            conn.close()
 
     def search_personal_deduction(
         self,
@@ -178,20 +178,19 @@ class RagChunkRepository:
         }
 
         try:
-            conn = psycopg.connect(**self.settings.database_kwargs())
+            conn_context = get_database_connection(self.settings)
         except Exception as exc:
             raise RuntimeError(
                 "Could not connect to Supabase PostgreSQL. Check network access and database settings."
             ) from exc
 
         try:
-            with conn.cursor(row_factory=dict_row) as cur:
-                cur.execute(PERSONAL_DEDUCTION_SQL, params)
-                return list(cur.fetchall())
+            with conn_context as conn:
+                with conn.cursor(row_factory=dict_row) as cur:
+                    cur.execute(PERSONAL_DEDUCTION_SQL, params)
+                    return list(cur.fetchall())
         except Exception as exc:
             raise RuntimeError("Supabase personal deduction lookup failed.") from exc
-        finally:
-            conn.close()
 
     @staticmethod
     def _load_database_dependencies() -> tuple[Any, Any, Any]:

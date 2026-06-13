@@ -54,6 +54,12 @@ class TaxCalculationService:
         rule = self._select_rule(resolved_tax_year)
         resolved_period = _resolve_period(income_period or entities.income_period)
         resolved_resident_status = (resident_status or entities.resident_status or "resident").strip().lower()
+        assumption_warnings = _assumption_warnings(
+            entities=entities,
+            resident_status=resident_status,
+            mandatory_insurance=mandatory_insurance,
+            dependents=dependents,
+        )
         resolved_input = TaxCalculationInput(
             gross_income=max(0, gross_income if gross_income is not None else entities.income or 0),
             income_period=resolved_period,
@@ -72,17 +78,26 @@ class TaxCalculationService:
         )
 
         if resolved_resident_status == "non_resident":
-            return self._calculate_non_resident(resolved_input, rule)
+            return self._calculate_non_resident(resolved_input, rule, assumption_warnings)
 
         if contract_type and contract_type.strip().lower() in SHORT_TERM_CONTRACT_TYPES:
-            return self._calculate_short_term_withholding(resolved_input, rule)
+            return self._calculate_short_term_withholding(
+                resolved_input,
+                rule,
+                assumption_warnings,
+            )
 
-        return self._calculate_resident_progressive(resolved_input, rule)
+        return self._calculate_resident_progressive(
+            resolved_input,
+            rule,
+            assumption_warnings,
+        )
 
     def _calculate_resident_progressive(
         self,
         calculation_input: TaxCalculationInput,
         rule: dict[str, Any],
+        assumption_warnings: list[str],
     ) -> TaxCalculationResult:
         multiplier = 12 if calculation_input.income_period == TaxPeriod.YEARLY else 1
         personal_deduction = int(rule["personal_deduction_monthly"]) * multiplier
@@ -120,7 +135,7 @@ class TaxCalculationService:
                 amount=tax_amount,
             ),
         ]
-        warnings = _base_warnings(calculation_input)
+        warnings = _base_warnings(calculation_input, assumption_warnings)
         return _result(
             method=TaxCalculationMethod.RESIDENT_PROGRESSIVE,
             rule=rule,
@@ -139,6 +154,7 @@ class TaxCalculationService:
         self,
         calculation_input: TaxCalculationInput,
         rule: dict[str, Any],
+        assumption_warnings: list[str],
     ) -> TaxCalculationResult:
         taxable_income = max(0, calculation_input.gross_income - calculation_input.tax_exempt_income)
         rate = float(rule["non_resident_salary_rate"])
@@ -155,7 +171,7 @@ class TaxCalculationService:
                 formula=f"taxable_income x {rate:.0%}",
             ),
         ]
-        warnings = _base_warnings(calculation_input)
+        warnings = _base_warnings(calculation_input, assumption_warnings)
         warnings.append("Non-resident salary/wage income does not apply family deductions in this MVP.")
         return _result(
             method=TaxCalculationMethod.NON_RESIDENT_FLAT_RATE,
@@ -175,6 +191,7 @@ class TaxCalculationService:
         self,
         calculation_input: TaxCalculationInput,
         rule: dict[str, Any],
+        assumption_warnings: list[str],
     ) -> TaxCalculationResult:
         taxable_income = max(0, calculation_input.gross_income - calculation_input.tax_exempt_income)
         rate = float(rule["short_term_withholding_rate"])
@@ -191,7 +208,7 @@ class TaxCalculationService:
                 formula=f"taxable_income x {rate:.0%}",
             ),
         ]
-        warnings = _base_warnings(calculation_input)
+        warnings = _base_warnings(calculation_input, assumption_warnings)
         warnings.append(
             "Short-term/no-contract withholding is a withholding estimate; annual finalization may differ."
         )
@@ -303,11 +320,38 @@ def round_vnd(value: float) -> int:
     return int(round(value))
 
 
-def _base_warnings(calculation_input: TaxCalculationInput) -> list[str]:
+def _assumption_warnings(
+    *,
+    entities: ExtractedEntities,
+    resident_status: str | None,
+    mandatory_insurance: int | None,
+    dependents: int | None,
+) -> list[str]:
+    warnings: list[str] = []
+    if resident_status is None and entities.resident_status is None:
+        warnings.append(
+            "Chưa cung cấp tình trạng cư trú; hệ thống tạm tính theo cá nhân cư trú."
+        )
+    if mandatory_insurance is None and entities.insurance is None:
+        warnings.append(
+            "Chưa cung cấp bảo hiểm bắt buộc; hệ thống tạm tính bảo hiểm bắt buộc bằng 0."
+        )
+    if dependents is None and entities.dependents is None:
+        warnings.append(
+            "Chưa cung cấp người phụ thuộc; hệ thống tạm tính số người phụ thuộc bằng 0."
+        )
+    return warnings
+
+
+def _base_warnings(
+    calculation_input: TaxCalculationInput,
+    assumption_warnings: list[str],
+) -> list[str]:
     warnings: list[str] = []
     if calculation_input.contract_type is None:
         warnings.append("contract_type was not provided; progressive resident method is used by default.")
-    return warnings
+    warnings.extend(assumption_warnings)
+    return list(dict.fromkeys(warnings))
 
 
 def _result(

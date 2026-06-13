@@ -124,6 +124,288 @@ revoke all on functions from anon, authenticated;
 
 
 -- =========================================================
+-- 5A. Internal monitoring tables
+-- =========================================================
+
+create table if not exists rag.query_logs (
+    id uuid primary key default gen_random_uuid(),
+
+    created_at timestamptz not null default now(),
+
+    conversation_id text,
+    user_id text,
+    assistant_message_id text,
+
+    status text not null default 'success'
+        check (
+            status in (
+                'success',
+                'blocked',
+                'rejected',
+                'clarification_required',
+                'llm_fallback',
+                'error'
+            )
+        ),
+    mode text,
+
+    original_question text,
+    normalized_question text,
+    standalone_question text,
+    retrieval_query text,
+
+    intent text,
+    route text,
+    confidence double precision,
+
+    top_k integer,
+    retrieved_count integer,
+    reranked_count integer,
+    prompt_estimated_tokens integer,
+
+    llm_provider text,
+    llm_model text,
+    llm_prompt_estimated_tokens integer,
+    llm_max_output_tokens integer,
+
+    response_time_ms integer,
+    answer text,
+    warnings jsonb not null default '[]'::jsonb,
+
+    error_type text,
+    error_message text,
+
+    request_payload jsonb,
+    processed_question jsonb,
+    classification jsonb,
+    routing jsonb,
+    query_embedding jsonb,
+    retrieval jsonb,
+    reranking jsonb,
+    tax_calculation jsonb,
+    context_metadata jsonb,
+    prompt_metadata jsonb,
+    llm jsonb,
+    response_validation jsonb,
+    citations jsonb not null default '[]'::jsonb
+);
+
+create index if not exists query_logs_created_at_idx
+on rag.query_logs(created_at desc);
+
+create index if not exists query_logs_status_idx
+on rag.query_logs(status);
+
+create index if not exists query_logs_user_id_idx
+on rag.query_logs(user_id);
+
+create index if not exists query_logs_conversation_id_idx
+on rag.query_logs(conversation_id);
+
+create index if not exists query_logs_confidence_idx
+on rag.query_logs(confidence);
+
+
+create table if not exists rag.query_log_chunks (
+    id bigserial primary key,
+
+    query_log_id uuid not null
+        references rag.query_logs(id)
+        on delete cascade,
+
+    created_at timestamptz not null default now(),
+
+    citation_id text,
+    chunk_id text,
+    document_id text,
+    document_number text,
+    document_name text,
+    document_type text,
+    article text,
+    source_url text,
+
+    retrieval_rank integer,
+    rerank_rank integer,
+    similarity double precision,
+    rerank_score double precision,
+
+    content_preview text,
+    metadata jsonb not null default '{}'::jsonb
+);
+
+create index if not exists query_log_chunks_query_log_id_idx
+on rag.query_log_chunks(query_log_id);
+
+create index if not exists query_log_chunks_chunk_id_idx
+on rag.query_log_chunks(chunk_id);
+
+create index if not exists query_log_chunks_document_number_idx
+on rag.query_log_chunks(document_number);
+
+create index if not exists query_log_chunks_created_at_idx
+on rag.query_log_chunks(created_at desc);
+
+
+create table if not exists rag.ingestion_runs (
+    id uuid primary key default gen_random_uuid(),
+
+    created_at timestamptz not null default now(),
+    finished_at timestamptz,
+
+    run_name text not null,
+    status text not null default 'running'
+        check (status in ('running', 'success', 'warning', 'error')),
+
+    total_documents integer not null default 0,
+    success_count integer not null default 0,
+    warning_count integer not null default 0,
+    error_count integer not null default 0,
+
+    note text
+);
+
+create index if not exists ingestion_runs_created_at_idx
+on rag.ingestion_runs(created_at desc);
+
+create index if not exists ingestion_runs_status_idx
+on rag.ingestion_runs(status);
+
+
+create table if not exists rag.ingestion_document_logs (
+    id bigserial primary key,
+
+    created_at timestamptz not null default now(),
+    run_id uuid
+        references rag.ingestion_runs(id)
+        on delete cascade,
+
+    document_id text,
+    step text not null,
+    status text not null
+        check (status in ('success', 'warning', 'empty', 'error', 'skipped')),
+
+    input_path text,
+    output_path text,
+
+    char_count integer,
+    chunk_count integer,
+    page_count integer,
+
+    warning text,
+    error_message text,
+    raw_log jsonb not null default '{}'::jsonb
+);
+
+create index if not exists ingestion_document_logs_created_at_idx
+on rag.ingestion_document_logs(created_at desc);
+
+create index if not exists ingestion_document_logs_run_id_idx
+on rag.ingestion_document_logs(run_id);
+
+create index if not exists ingestion_document_logs_document_id_idx
+on rag.ingestion_document_logs(document_id);
+
+create index if not exists ingestion_document_logs_status_idx
+on rag.ingestion_document_logs(status);
+
+create index if not exists ingestion_document_logs_step_idx
+on rag.ingestion_document_logs(step);
+
+
+create table if not exists rag.documents (
+    document_id text primary key,
+
+    file_name text,
+    document_title text,
+    document_number text,
+    document_type text,
+    issuing_authority text,
+
+    issue_date date,
+    effective_date date,
+    expiry_date date,
+    status text not null default 'draft'
+        check (
+            status in (
+                'draft',
+                'effective',
+                'partially_effective',
+                'expired',
+                'superseded'
+            )
+        ),
+
+    source_url text,
+    local_path text,
+    version text,
+    topics text,
+    notes text,
+
+    extractor text,
+    page_count integer,
+    extracted_char_count integer not null default 0,
+    extracted_preview text,
+
+    ingestion_status text not null default 'uploaded'
+        check (
+            ingestion_status in (
+                'uploaded',
+                'extracted',
+                'ingesting',
+                'indexed',
+                'error',
+                'removed_from_search'
+            )
+        ),
+    ingestion_error text,
+
+    search_enabled boolean not null default false,
+    chunk_count integer not null default 0,
+    last_ingested_at timestamptz,
+
+    metadata jsonb not null default '{}'::jsonb,
+
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+create index if not exists documents_document_number_idx
+on rag.documents(document_number);
+
+create index if not exists documents_status_idx
+on rag.documents(status);
+
+create index if not exists documents_ingestion_status_idx
+on rag.documents(ingestion_status);
+
+create index if not exists documents_search_enabled_idx
+on rag.documents(search_enabled);
+
+create index if not exists documents_updated_at_idx
+on rag.documents(updated_at desc);
+
+create index if not exists documents_metadata_gin_idx
+on rag.documents
+using gin(metadata);
+
+alter table rag.query_logs disable row level security;
+alter table rag.query_log_chunks disable row level security;
+alter table rag.ingestion_runs disable row level security;
+alter table rag.ingestion_document_logs disable row level security;
+alter table rag.documents disable row level security;
+
+revoke all on table
+    rag.query_logs,
+    rag.query_log_chunks,
+    rag.ingestion_runs,
+    rag.ingestion_document_logs,
+    rag.documents
+from anon, authenticated;
+
+revoke all on all sequences in schema rag from anon, authenticated;
+
+
+-- =========================================================
 -- 6. Remove old public vector search functions
 -- =========================================================
 
@@ -275,7 +557,7 @@ create table if not exists public.conversations (
         references auth.users(id)
         on delete cascade,
 
-    title text not null default 'Cuoc tro chuyen moi',
+    title text not null default 'Cuộc trò chuyện mới',
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
@@ -587,6 +869,14 @@ on public.conversations;
 
 create trigger conversations_set_updated_at
 before update on public.conversations
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists documents_set_updated_at
+on rag.documents;
+
+create trigger documents_set_updated_at
+before update on rag.documents
 for each row
 execute function public.set_updated_at();
 

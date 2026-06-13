@@ -55,6 +55,14 @@ def _env_float(name: str, default: float) -> float:
         return default
 
 
+def _env_csv(name: str) -> tuple[str, ...]:
+    return tuple(
+        item.strip()
+        for item in os.getenv(name, "").split(",")
+        if item.strip()
+    )
+
+
 def configure_model_cache() -> None:
     hf_home = CACHE_DIR / "huggingface"
     sentence_transformers_home = CACHE_DIR / "sentence_transformers"
@@ -102,6 +110,9 @@ class Settings:
 
     supabase_url: str
     supabase_anon_key: str
+
+    monitoring_admin_user_ids: tuple[str, ...]
+    monitoring_api_key: str
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -185,6 +196,9 @@ class Settings:
                 os.getenv("SUPABASE_ANON_KEY", "").strip()
                 or os.getenv("VITE_SUPABASE_ANON_KEY", "").strip()
             ),
+
+            monitoring_admin_user_ids=_env_csv("MONITORING_ADMIN_USER_IDS"),
+            monitoring_api_key=os.getenv("MONITORING_API_KEY", "").strip(),
         )
 
     @property

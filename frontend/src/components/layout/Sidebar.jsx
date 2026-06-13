@@ -1,6 +1,7 @@
 import { formatDate } from "../../utils/formatDate.js";
 
 export default function Sidebar({
+  activeView = "chat",
   conversations,
   currentConversationId,
   health,
@@ -9,18 +10,45 @@ export default function Sidebar({
   authError,
   isAuthLoading,
   onSignOut,
+  onChangeView,
   onNewConversation,
   onSelectConversation,
 }) {
+  const handleNewConversation = () => {
+    onChangeView?.("chat");
+    onNewConversation();
+  };
+
   return (
     <div className="sidebar">
       <div className="sidebar-top">
         <div>
           <div className="brand-mark">TNCN</div>
-          <p className="sidebar-title">Hội thoại</p>
+          <p className="sidebar-title">
+            {activeView === "admin" ? "Quản trị tài liệu" : "Hội thoại"}
+          </p>
         </div>
-        <button className="primary-button" type="button" onClick={onNewConversation}>
+        <button className="primary-button" type="button" onClick={handleNewConversation}>
           Chat mới
+        </button>
+      </div>
+
+      <div className="view-switch" aria-label="Chuyển khu vực">
+        <button
+          className={`view-switch-button ${activeView === "chat" ? "view-switch-button--active" : ""}`}
+          type="button"
+          onClick={() => onChangeView?.("chat")}
+        >
+          Hội thoại
+        </button>
+        <button
+          className={`view-switch-button ${
+            activeView === "admin" ? "view-switch-button--active" : ""
+          }`}
+          type="button"
+          onClick={() => onChangeView?.("admin")}
+        >
+          Tài liệu
         </button>
       </div>
 
@@ -61,7 +89,10 @@ export default function Sidebar({
               conversation.id === currentConversationId ? "conversation-item--active" : ""
             }`}
             type="button"
-            onClick={() => onSelectConversation(conversation.id)}
+            onClick={() => {
+              onChangeView?.("chat");
+              onSelectConversation(conversation.id);
+            }}
           >
             <span>{conversation.title}</span>
             <small>{formatDate(conversation.updatedAt || conversation.createdAt)}</small>

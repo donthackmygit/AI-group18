@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 import logging
 import re
+import unicodedata
 from statistics import mean
 from time import perf_counter
 from backend.app.core.config import Settings
@@ -26,6 +28,7 @@ from backend.app.schemas.query_route import (
     QueryRoute,
     QueryRoutingResult,
 )
+from backend.app.schemas.tax_calculation import TaxCalculationResult
 from backend.app.services.embedding_service import EmbeddingService
 from backend.app.services.context_builder_service import ContextBuilderService
 from backend.app.services.llm_service import LLMService, LLMServiceError
@@ -38,9 +41,21 @@ from backend.app.services.retriever_service import RetrieverService
 from backend.app.services.tax_calculation_service import TaxCalculationService
 
 logger = logging.getLogger(__name__)
+_MONITORING_EXECUTOR = ThreadPoolExecutor(
+    max_workers=2,
+    thread_name_prefix="query-monitoring",
+)
+
+
+def shutdown_chat_workers() -> None:
+    _MONITORING_EXECUTOR.shutdown(wait=True)
 
 LLM_FALLBACK_WARNING = (
     "LLM chưa tạo được câu trả lời; hệ thống trả lời bằng nội dung trích xuất từ nguồn pháp luật."
+)
+
+SOURCE_VALIDATION_WARNING = (
+    "Câu trả lời đã dựa trên nguồn tìm thấy, nhưng phần kiểm tra trích dẫn cần rà soát thêm."
 )
 
 PERSONAL_DEDUCTION_DOCUMENT_NUMBERS = {
@@ -66,6 +81,9 @@ class ChatGatewayService:
         self.auth_service = SupabaseAuthService(settings)
         self.chat_history_repository = ChatHistoryRepository(settings)
         self.monitoring_repository = MonitoringRepository(settings)
+
+    def warm_up(self) -> None:
+        self.query_embedding_service.embedding_service.encode_query("thuế thu nhập cá nhân")
 
     def search(self, request: SearchRequest) -> SearchResponse:
         validation_result = self._run_guardrails(request)
@@ -115,11 +133,15 @@ class ChatGatewayService:
         rerank_top_k: int,
         context_max_tokens: int,
     ) -> SearchResponse:
+        stage_started = perf_counter()
         query_embedding = self.query_embedding_service.embed_query(
             processed_question=processed_question,
             classification=classification,
             routing=routing,
         )
+        _log_stage_duration("query_embedding", stage_started)
+
+        stage_started = perf_counter()
         retrieval_payload = self.retriever.retrieve_semantic(
             query_embedding=query_embedding.vector,
             top_k=top_k,
@@ -128,18 +150,27 @@ class ChatGatewayService:
             effective_date=request.effective_date,
             topic_hint=processed_question.topic,
         )
+        _log_stage_duration("retrieval", stage_started)
+
+        stage_started = perf_counter()
         reranked_citations, reranking = self.reranker.rerank(
             citations=retrieval_payload.citations,
             processed_question=processed_question,
             classification=classification,
             top_k=rerank_top_k,
         )
+        _log_stage_duration("reranking", stage_started)
+
+        stage_started = perf_counter()
         context_payload = self.context_builder.build(
             citations=reranked_citations,
             max_tokens=context_max_tokens,
         )
+        _log_stage_duration("context_build", stage_started)
+
         calculation = None
         if routing.tax_calculation_required:
+            stage_started = perf_counter()
             calculation = self.tax_calculation_service.calculate_salary_tax(
                 entities=processed_question.entities,
                 effective_date=request.effective_date,
@@ -154,6 +185,9 @@ class ChatGatewayService:
                 tax_year=request.tax_year,
                 contract_type=request.contract_type,
             )
+            _log_stage_duration("tax_calculation", stage_started)
+
+        stage_started = perf_counter()
         prompt = self.prompt_builder.build(
             processed_question=processed_question,
             classification=classification,
@@ -161,6 +195,7 @@ class ChatGatewayService:
             context=context_payload.result,
             calculation=calculation,
         )
+        _log_stage_duration("prompt_build", stage_started)
         return SearchResponse(
             question=processed_question.standalone_question,
             top_k=top_k,
@@ -212,6 +247,10 @@ class ChatGatewayService:
                 ),
                 request,
             )
+            processed_question = _merge_conversation_entities(
+                processed_question,
+                conversation_context,
+            )
             classification, routing = self._classify_and_route(processed_question, conversation_context)
 
             if routing.route == QueryRoute.REJECT:
@@ -234,6 +273,7 @@ class ChatGatewayService:
                 )
 
             if routing.route == QueryRoute.CLARIFICATION_REQUIRED:
+                self.conversation_store.update(request.conversation_id, processed_question)
                 response = self.response_formatter.format_chat_response(
                     answer=routing.clarification_message or "Bạn vui lòng cung cấp thêm thông tin.",
                     conversation_id=request.conversation_id,
@@ -266,18 +306,46 @@ class ChatGatewayService:
             )
             self.conversation_store.update(request.conversation_id, processed_question)
 
-            confidence = (
-                mean(citation.similarity for citation in search_response.citations)
-                if search_response.citations
-                else None
-            )
+            confidence = _retrieval_confidence(search_response.citations)
+
+            if _should_answer_residency_deterministically(processed_question, routing):
+                response = self.response_formatter.format_chat_response(
+                    answer=_build_residency_answer(processed_question),
+                    conversation_id=request.conversation_id,
+                    mode="rule_based",
+                    citations=search_response.citations,
+                    confidence=confidence or classification.confidence,
+                    warning=(
+                        "Kết quả chỉ mang tính tham khảo, không thay thế ý kiến của cơ quan thuế "
+                        "hoặc chuyên gia thuế."
+                    ),
+                    processed_question=processed_question,
+                    classification=classification,
+                    routing=routing,
+                    query_embedding=search_response.query_embedding,
+                    retrieval=search_response.retrieval,
+                    reranking=search_response.reranking,
+                    calculation=search_response.calculation,
+                    context=search_response.context,
+                    prompt=search_response.prompt,
+                )
+                return self._persist_and_log_response(
+                    request=request,
+                    response=response,
+                    authenticated_user=authenticated_user,
+                    started_at=started_at,
+                )
 
             if search_response.prompt is None:
                 raise RuntimeError("Prompt Builder did not produce a prompt for the LLM step.")
 
             response_mode = "llm"
             try:
+                stage_started = perf_counter()
                 llm_result = self.llm_service.generate(search_response.prompt)
+                _log_stage_duration("llm_generate", stage_started)
+
+                stage_started = perf_counter()
                 response_validation = self.response_validation_service.validate(
                     llm_result=llm_result,
                     context=search_response.context,
@@ -285,14 +353,41 @@ class ChatGatewayService:
                     routing=routing,
                     effective_date=request.effective_date,
                 )
-                answer = (
-                    response_validation.safe_answer
-                    or llm_result.answer
-                    or llm_result.raw_text
-                )
+                _log_stage_duration("response_validation", stage_started)
+                if _has_valid_calculation(search_response.calculation):
+                    answer = _build_calculation_answer(search_response.calculation)
+                    validation_warning = response_validation.warning
+                elif (
+                    not response_validation.is_valid
+                    and _should_replace_with_source_fallback(response_validation, llm_result)
+                    and search_response.citations
+                ):
+                    response_mode = "llm_fallback"
+                    answer = _build_source_review_answer(search_response.citations)
+                    validation_warning = _merge_warning_text(
+                        response_validation.warning,
+                        SOURCE_VALIDATION_WARNING,
+                    )
+                elif not response_validation.is_valid:
+                    answer = (
+                        llm_result.answer
+                        or llm_result.raw_text
+                        or response_validation.safe_answer
+                    )
+                    validation_warning = _merge_warning_text(
+                        response_validation.warning,
+                        SOURCE_VALIDATION_WARNING,
+                    )
+                else:
+                    answer = (
+                        response_validation.safe_answer
+                        or llm_result.answer
+                        or llm_result.raw_text
+                    )
+                    validation_warning = response_validation.warning
                 warning = _merge_warning_text(
                     llm_result.warning,
-                    response_validation.warning,
+                    validation_warning,
                 )
 
             except LLMServiceError as exc:
@@ -316,6 +411,7 @@ class ChatGatewayService:
                 confidence=_validated_confidence(
                     confidence,
                     response_validation.is_valid if response_validation else True,
+                    has_source_fallback=bool(search_response.citations),
                 ),
                 warning=warning,
                 processed_question=processed_question,
@@ -389,17 +485,48 @@ class ChatGatewayService:
 
         response_time_ms = int((perf_counter() - started_at) * 1000)
 
+        self._schedule_query_log(
+            request=request,
+            response=persisted_response,
+            user_id=authenticated_user.id if authenticated_user else None,
+            response_time_ms=response_time_ms,
+        )
+
+        return persisted_response
+
+    def _schedule_query_log(
+        self,
+        *,
+        request: ChatRequest,
+        response: ChatResponse,
+        user_id: str | None,
+        response_time_ms: int,
+    ) -> None:
+        _MONITORING_EXECUTOR.submit(
+            self._insert_query_log_safely,
+            request=request,
+            response=response,
+            user_id=user_id,
+            response_time_ms=response_time_ms,
+        )
+
+    def _insert_query_log_safely(
+        self,
+        *,
+        request: ChatRequest,
+        response: ChatResponse,
+        user_id: str | None,
+        response_time_ms: int,
+    ) -> None:
         try:
             self.monitoring_repository.insert_query_log(
                 request=request,
-                response=persisted_response,
-                user_id=authenticated_user.id if authenticated_user else None,
+                response=response,
+                user_id=user_id,
                 response_time_ms=response_time_ms,
             )
         except Exception:
             logger.exception("Failed to write query monitoring log")
-
-        return persisted_response
 
     def _safe_log_error(
         self,
@@ -537,12 +664,68 @@ def _apply_tax_input_overrides(
     )
 
 
-def _validated_confidence(confidence: float | None, is_valid: bool) -> float | None:
+def _merge_conversation_entities(
+    processed_question: ProcessedQuestion,
+    conversation_context: dict | None,
+) -> ProcessedQuestion:
+    if not conversation_context:
+        return processed_question
+
+    last_entities = conversation_context.get("last_entities") or {}
+    if not isinstance(last_entities, dict):
+        return processed_question
+
+    current_entities = processed_question.entities.model_dump()
+    merged_entities = {
+        key: current_entities.get(key) if current_entities.get(key) is not None else last_entities.get(key)
+        for key in current_entities
+    }
+    if merged_entities == current_entities:
+        return processed_question
+
+    return processed_question.model_copy(
+        update={
+            "entities": processed_question.entities.model_copy(update=merged_entities),
+        }
+    )
+
+
+def _retrieval_confidence(citations: list[Citation]) -> float | None:
+    if not citations:
+        return None
+
+    similarities = [citation.similarity for citation in citations if citation.similarity is not None]
+    if not similarities:
+        return None
+
+    best = max(similarities)
+    average = mean(similarities)
+    # Prefer the best legal source, but keep the average in the score so a
+    # single lucky chunk cannot dominate the confidence completely.
+    return (best * 0.65) + (average * 0.35)
+
+
+def _validated_confidence(
+    confidence: float | None,
+    is_valid: bool,
+    *,
+    has_source_fallback: bool = False,
+) -> float | None:
     if is_valid:
         return confidence
     if confidence is None:
         return 0.0
+    if has_source_fallback:
+        return max(min(confidence, 0.8), 0.55)
     return min(confidence, 0.3)
+
+
+def _log_stage_duration(stage: str, started_at: float) -> None:
+    elapsed_ms = int((perf_counter() - started_at) * 1000)
+    if elapsed_ms >= 1000:
+        logger.info("Chat pipeline stage '%s' took %sms", stage, elapsed_ms)
+    else:
+        logger.debug("Chat pipeline stage '%s' took %sms", stage, elapsed_ms)
 
 
 def _merge_warning_text(*warnings: str | None) -> str | None:
@@ -550,6 +733,147 @@ def _merge_warning_text(*warnings: str | None) -> str | None:
     if not values:
         return None
     return " | ".join(dict.fromkeys(values))
+
+
+def _has_valid_calculation(calculation: TaxCalculationResult | None) -> bool:
+    return bool(calculation and calculation.applied and calculation.tax_amount is not None)
+
+
+def _should_answer_residency_deterministically(
+    processed_question: ProcessedQuestion,
+    routing: QueryRoutingResult,
+) -> bool:
+    if routing.tax_calculation_required:
+        return False
+    q = _ascii_fold(processed_question.standalone_question)
+    return (
+        processed_question.entities.days_in_vietnam is not None
+        and "cu tru" in q
+        and "thue" in q
+    )
+
+
+def _build_residency_answer(processed_question: ProcessedQuestion) -> str:
+    entities = processed_question.entities
+    days = entities.days_in_vietnam or 0
+    is_resident = days >= 183
+    status = "cá nhân cư trú" if is_resident else "cá nhân không cư trú"
+    comparator = "từ 183 ngày trở lên" if is_resident else "dưới 183 ngày"
+
+    details = []
+    if entities.nationality:
+        details.append(f"quốc tịch/người {entities.nationality}")
+    if entities.work_start_month:
+        details.append(f"làm việc tại Việt Nam từ tháng {entities.work_start_month}")
+    details.append(f"có mặt tại Việt Nam {days} ngày trong năm")
+
+    if is_resident:
+        tax_rule = (
+            "Về nguyên tắc, cá nhân cư trú chịu thuế TNCN theo biểu thuế lũy tiến từng phần "
+            "đối với thu nhập từ tiền lương, tiền công sau khi trừ các khoản giảm trừ được áp dụng. "
+            "Nếu muốn tính ra số tiền cụ thể, bạn cần cung cấp thu nhập, bảo hiểm bắt buộc, "
+            "số người phụ thuộc và các khoản miễn/giảm trừ liên quan."
+        )
+    else:
+        tax_rule = (
+            "Về nguyên tắc, cá nhân không cư trú thường bị tính thuế theo thuế suất toàn phần "
+            "đối với thu nhập phát sinh tại Việt Nam, không áp dụng giảm trừ gia cảnh như cá nhân cư trú."
+        )
+
+    return (
+        "Dựa trên các dữ kiện đã cung cấp, bạn thuộc diện "
+        f"{status}.\n\n"
+        f"- Dữ kiện đã ghi nhận: {'; '.join(details)}.\n"
+        f"- Lý do: thời gian có mặt tại Việt Nam là {days} ngày, tức {comparator} trong năm.\n"
+        f"- Cách tính thuế: {tax_rule}"
+    )
+
+
+def _ascii_fold(text: str) -> str:
+    text = text.replace("đ", "d").replace("Đ", "D")
+    normalized = unicodedata.normalize("NFD", text.casefold())
+    return "".join(ch for ch in normalized if unicodedata.category(ch) != "Mn")
+
+
+def _should_replace_with_source_fallback(response_validation: object, llm_result: object) -> bool:
+    answer = (getattr(llm_result, "answer", None) or getattr(llm_result, "raw_text", None) or "").strip()
+    if not answer:
+        return True
+
+    fatal_issue_codes = {
+        "EMPTY_ANSWER",
+        "INVALID_CITATION_SOURCE",
+        "SOURCE_NOT_YET_EFFECTIVE",
+        "SOURCE_EXPIRED_AT_REQUESTED_DATE",
+        "TAX_CALCULATION_MISMATCH",
+    }
+    issues = getattr(response_validation, "issues", []) or []
+    return any(getattr(issue, "code", None) in fatal_issue_codes for issue in issues)
+
+
+def _build_calculation_answer(calculation: TaxCalculationResult | None) -> str:
+    if not _has_valid_calculation(calculation) or calculation is None:
+        return "Hệ thống chưa có đủ dữ liệu để tính thuế TNCN."
+
+    period_text = "tháng"
+    if calculation.input and getattr(calculation.input.income_period, "value", calculation.input.income_period) == "yearly":
+        period_text = "năm"
+
+    lines = [
+        "Mình tạm tính thuế TNCN theo kết quả Tax Calculation Service như sau:",
+        f"- Thu nhập tính thuế sau giảm trừ: {_format_vnd(calculation.taxable_income or 0)} đồng/{period_text}.",
+        f"- Giảm trừ bản thân: {_format_vnd(calculation.personal_deduction)} đồng/{period_text}.",
+        f"- Giảm trừ người phụ thuộc: {_format_vnd(calculation.dependent_deduction)} đồng/{period_text}.",
+    ]
+
+    if calculation.mandatory_insurance:
+        lines.insert(
+            1,
+            f"- Bảo hiểm bắt buộc đã trừ: {_format_vnd(calculation.mandatory_insurance)} đồng/{period_text}.",
+        )
+
+    if calculation.bracket_breakdown:
+        lines.append("- Tính theo từng bậc:")
+        for index, bracket in enumerate(calculation.bracket_breakdown, start=1):
+            upper = (
+                "trở lên"
+                if bracket.upper_bound is None
+                else f"đến {_format_vnd(bracket.upper_bound)} đồng"
+            )
+            lines.append(
+                "  "
+                f"Bậc {index}: {_format_vnd(bracket.taxable_amount)} đồng "
+                f"({upper}) x {bracket.rate:.0%} = {_format_vnd(bracket.tax_amount)} đồng."
+            )
+
+    lines.append(
+        f"=> Thuế TNCN tạm tính phải nộp: {_format_vnd(calculation.tax_amount or 0)} đồng/{period_text}."
+    )
+    return "\n".join(lines)
+
+
+def _format_vnd(value: int) -> str:
+    return f"{int(value):,}".replace(",", ".")
+
+
+def _build_source_review_answer(citations: list[Citation]) -> str:
+    if not citations:
+        return "Hệ thống chưa tìm thấy đủ căn cứ pháp lý phù hợp để trả lời câu hỏi này."
+
+    snippets = []
+    for index, citation in enumerate(citations[:3], start=1):
+        content = _compact_text(citation.content)
+        if len(content) > 520:
+            content = content[:520].rsplit(" ", 1)[0].rstrip() + "..."
+        source_label = _source_label(citation)
+        snippets.append(f"{index}. {source_label}: {content}")
+
+    return (
+        "Mình tìm thấy các đoạn tài liệu liên quan, nhưng phần kiểm tra trích dẫn của câu trả lời "
+        "cần rà soát thêm. Nội dung tham khảo gần nhất:\n"
+        + "\n".join(snippets)
+        + "\n\nBạn nên đối chiếu phần nguồn tham khảo bên dưới trước khi dùng cho quyết định chính thức."
+    )
 
 
 def _build_extractive_fallback_answer(citations: list[Citation]) -> str:
@@ -642,3 +966,14 @@ def _date_ordinal(value: object) -> int:
 
 def _compact_text(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _source_label(citation: Citation) -> str:
+    parts = [
+        citation.document_number,
+        citation.document_title,
+        citation.article,
+        citation.article_title,
+    ]
+    label = " - ".join(str(part).strip() for part in parts if part and str(part).strip())
+    return label or citation.chunk_id or "Nguồn tham khảo"
