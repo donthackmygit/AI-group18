@@ -2,18 +2,20 @@
   "document_id": "DISPATCH_5001_TCT_DNNCN",
   "source_file": "data/processed/structured_documents/DISPATCH_5001_TCT_DNNCN.json",
   "source_parse_status": "NO_ARTICLE_FOUND",
-  "chunked_at": "2026-06-11T09:51:31",
-  "chunk_count": 3,
-  "max_chars_per_chunk": 1800,
+  "chunked_at": "2026-06-14T17:55:15",
+  "chunk_count": 2,
+  "max_tokens_per_chunk": 900,
+  "overlap_tokens": 80,
+  "max_chars_per_chunk": 3600,
   "min_chars_per_chunk": 300,
-  "paragraph_overlap": 0,
+  "paragraph_overlap": 1,
   "chunks": [
     {
       "chunk_id": "DISPATCH_5001_TCT_DNNCN_PARAGRAPH_CHUNK_001",
       "document_id": "DISPATCH_5001_TCT_DNNCN",
       "chunk_type": "paragraph_group",
-      "text": "BỘ TÀI CHÍNH\nTỔNG CỤC THUẾ\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 5001/TCT-DNNCN\nV/v xác định căn cứ tính thuế thu nhập cá nhân đối với thu nhập từ thừa kế\nHà Nội, ngày 08 tháng 11 năm 2023\nKính gửi: Cục Thuế TP. Hồ Chí Minh Tổng cục Thuế nhận được công văn số 9371/CTTPHCM-HKDCN ngày 31/7/2023 của Cục Thuế TP. Hồ Chí Minh đề nghị hướng dẫn việc xác định căn cứ tính thuế thu nhập cá nhân đối với khoản thu nhập từ thừa kế là cổ phiếu. Về vấn đề này, Tổng cục Thuế có ý kiến như sau:\nTại khoản 26 Điều 4 Luật chứng khoán năm 2019 quy định:\n“Hệ thống giao dịch chứng khoán bao gồm hệ thống giao dịch cho chứng khoán niêm yết và hệ thống giao dịch cho chứng khoán chưa niêm yết, do Sở giao dịch chứng khoán Việt Nam và công ty con của Sở giao dịch chứng khoán Việt Nam\n(sau đây gọi là Sở giao dịch chứng khoán Việt Nam và công ty con) tổ chức, vận hành”\nTại khoản 1 Điều 42 Luật chứng khoán năm 2019 quy định:\n“Sở giao dịch chứng khoán Việt Nam và công ty con được tổ chức thị trường giao dịch chứng khoán cho chứng khoán đủ điều kiện niêm yết; chứng khoán của doanh nghiệp nhà nước, công ty trách nhiệm hữu hạn một thành viên do doanh nghiệp nhà nước nắm giữ 100% vốn điều lệ chuyển đổi thành công ty cổ phần; chứng khoán của các doanh nghiệp khác chưa đủ điều kiện niêm yết; chứng khoán của doanh nghiệp khởi nghiệp sáng tạo; chứng khoán phái sinh và các loại chứng khoán khác\ntheo quy định của Chính phủ.”\nTại khoản 35 Điều 3 Nghị định số 155/2020/NĐ-CP ngày 31/12/2020 của Chính phủ quy định chi tiết thi hành một số điều của Luật chứng khoán quy định:\n“Hệ thống giao dịch Upcom là hệ thống giao dịch cho chứng khoán chưa niêm yết do Sở giao dịch chứng khoán tổ chức, vận hành”",
-      "char_count": 1708,
+      "text": "BỘ TÀI CHÍNH\nTỔNG CỤC THUẾ\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 5001/TCT-DNNCN\nV/v xác định căn cứ tính thuế thu nhập cá nhân đối với thu nhập từ thừa kế\nHà Nội, ngày 08 tháng 11 năm 2023\nKính gửi: Cục Thuế TP. Hồ Chí Minh Tổng cục Thuế nhận được công văn số 9371/CTTPHCM-HKDCN ngày 31/7/2023 của Cục Thuế TP. Hồ Chí Minh đề nghị hướng dẫn việc xác định căn cứ tính thuế thu nhập cá nhân đối với khoản thu nhập từ thừa kế là cổ phiếu. Về vấn đề này, Tổng cục Thuế có ý kiến như sau:\nTại khoản 26 Điều 4 Luật chứng khoán năm 2019 quy định:\n“Hệ thống giao dịch chứng khoán bao gồm hệ thống giao dịch cho chứng khoán niêm yết và hệ thống giao dịch cho chứng khoán chưa niêm yết, do Sở giao dịch chứng khoán Việt Nam và công ty con của Sở giao dịch chứng khoán Việt Nam\n(sau đây gọi là Sở giao dịch chứng khoán Việt Nam và công ty con) tổ chức, vận hành”\nTại khoản 1 Điều 42 Luật chứng khoán năm 2019 quy định:\n“Sở giao dịch chứng khoán Việt Nam và công ty con được tổ chức thị trường giao dịch chứng khoán cho chứng khoán đủ điều kiện niêm yết; chứng khoán của doanh nghiệp nhà nước, công ty trách nhiệm hữu hạn một thành viên do doanh nghiệp nhà nước nắm giữ 100% vốn điều lệ chuyển đổi thành công ty cổ phần; chứng khoán của các doanh nghiệp khác chưa đủ điều kiện niêm yết; chứng khoán của doanh nghiệp khởi nghiệp sáng tạo; chứng khoán phái sinh và các loại chứng khoán khác\ntheo quy định của Chính phủ.”\nTại khoản 35 Điều 3 Nghị định số 155/2020/NĐ-CP ngày 31/12/2020 của Chính phủ quy định chi tiết thi hành một số điều của Luật chứng khoán quy định:\n“Hệ thống giao dịch Upcom là hệ thống giao dịch cho chứng khoán chưa niêm yết do Sở giao dịch chứng khoán tổ chức, vận hành”\nTại điểm a khoản 9 Điều 2 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 hướng dẫn thực hiện Luật thuế thu nhập cá nhân, Luật sửa đổi, bổ sung một số điều của Luật thuế thu nhập cá nhân và Nghị định số 65/2013/NĐ-CP của Chính phủ quy định chi tiết một số điều của Luật thuế thu nhập cá nhân và Luật sửa đổi, bổ sung một số điều của Luật thuế thu nhập cá nhân quy định:\n“Điều 2. Các khoản thu nhập chịu thuế …\n9. Thu nhập từ nhận thừa kế Thu nhập từ nhận thừa kế là khoản thu nhập mà cá nhân nhận được theo di chúc hoặc theo quy định của pháp luật về thừa kế, cụ thể như sau:\na) Đối với nhận thừa kế là chứng khoán bao gồm: cổ phiếu, quyền mua cổ phiếu, trái phiếu, tín phiếu, chứng chỉ quỹ và các loại chứng khoán khác theo quy định của Luật Chứng khoán; cổ phần của cá nhân trong công ty cổ phần theo quy định của\nLuật Doanh nghiệp.”\nTại điểm a khoản 1 Điều 16 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 (được sửa đổi bởi khoản 1 Điều 19 Thông tư 92/2015/TT-BTC ngày 15/6/2015 của\nBộ Tài chính) quy định:\n“Điều 16. Căn cứ tính thuế từ thừa kế, quà tặng\nCăn cứ tính thuế đối với thu nhập từ thừa kế, quà tặng là thu nhập tính thuế và thuế suất.\n1. Thu nhập tính thuế Thu nhập tính thuế từ nhận thừa kế, quà tặng là phần giá trị tài sản nhận thừa kế, quà tặng vượt trên 10 triệu đồng mỗi lần nhận. Giá trị tài sản nhận thừa kế, quà tặng được xác định đối với từng trường hợp, cụ thể như sau:\na) Đối với thừa kế, quà tặng là chứng khoán: giá trị tài sản nhận thừa kế là\nphần giá trị tài sản nhận thừa kế, quà tặng vượt trên 10 triệu đồng tính trên toàn bộ các mã chứng khoán nhận được chưa trừ bất cứ một khoản chi phí nào tại thời điểm đăng ký chuyển quyền sở hữu. Cụ thể như sau:\na.1) Đối với chứng khoán giao dịch trên Sở Giao dịch chứng khoán: giá trị của chứng khoán được căn cứ vào giá tham chiếu trên Sở giao dịch chứng khoán tại thời điểm đăng ký quyền sở hữu chứng khoán.",
+      "char_count": 3583,
       "metadata": {
         "document_id": "DISPATCH_5001_TCT_DNNCN",
         "file_name": "5001-TCT-DNNCN.pdf",
@@ -38,17 +40,17 @@
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
         "paragraph_start": 1,
-        "paragraph_end": 16,
-        "paragraph_count": 16,
-        "overlap_paragraphs": 0
+        "paragraph_end": 29,
+        "paragraph_count": 29,
+        "overlap_paragraphs": 1
       }
     },
     {
       "chunk_id": "DISPATCH_5001_TCT_DNNCN_PARAGRAPH_CHUNK_002",
       "document_id": "DISPATCH_5001_TCT_DNNCN",
       "chunk_type": "paragraph_group",
-      "text": "Tại điểm a khoản 9 Điều 2 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 hướng dẫn thực hiện Luật thuế thu nhập cá nhân, Luật sửa đổi, bổ sung một số điều của Luật thuế thu nhập cá nhân và Nghị định số 65/2013/NĐ-CP của Chính phủ quy định chi tiết một số điều của Luật thuế thu nhập cá nhân và Luật sửa đổi, bổ sung một số điều của Luật thuế thu nhập cá nhân quy định:\n“Điều 2. Các khoản thu nhập chịu thuế …\n9. Thu nhập từ nhận thừa kế Thu nhập từ nhận thừa kế là khoản thu nhập mà cá nhân nhận được theo di chúc hoặc theo quy định của pháp luật về thừa kế, cụ thể như sau:\na) Đối với nhận thừa kế là chứng khoán bao gồm: cổ phiếu, quyền mua cổ phiếu, trái phiếu, tín phiếu, chứng chỉ quỹ và các loại chứng khoán khác theo quy định của Luật Chứng khoán; cổ phần của cá nhân trong công ty cổ phần theo quy định của\nLuật Doanh nghiệp.”\nTại điểm a khoản 1 Điều 16 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 (được sửa đổi bởi khoản 1 Điều 19 Thông tư 92/2015/TT-BTC ngày 15/6/2015 của\nBộ Tài chính) quy định:\n“Điều 16. Căn cứ tính thuế từ thừa kế, quà tặng\nCăn cứ tính thuế đối với thu nhập từ thừa kế, quà tặng là thu nhập tính thuế và thuế suất.\n1. Thu nhập tính thuế Thu nhập tính thuế từ nhận thừa kế, quà tặng là phần giá trị tài sản nhận thừa kế, quà tặng vượt trên 10 triệu đồng mỗi lần nhận. Giá trị tài sản nhận thừa kế, quà tặng được xác định đối với từng trường hợp, cụ thể như sau:\na) Đối với thừa kế, quà tặng là chứng khoán: giá trị tài sản nhận thừa kế là\nphần giá trị tài sản nhận thừa kế, quà tặng vượt trên 10 triệu đồng tính trên toàn bộ các mã chứng khoán nhận được chưa trừ bất cứ một khoản chi phí nào tại thời điểm đăng ký chuyển quyền sở hữu. Cụ thể như sau:",
-      "char_count": 1675,
+      "text": "a.2) Đối với chứng khoán không thuộc trường hợp trên: giá trị của chứng khoán được căn cứ vào giá trị sổ sách kế toán của công ty phát hành loại chứng khoán đó tại thời điểm lập báo cáo tài chính gần nhất theo quy định của pháp luật về kế toán trước thời điểm đăng ký quyền sở hữu chứng khoán.”\nCăn cứ các quy định nêu trên, cổ phiếu giao dịch trên hệ thống giao dịch Upcom là cổ phiếu giao dịch trên Sở giao dịch chứng khoán. Do đó, giá trị tài sản thừa nhận kế là cổ phiếu giao dịch trên hệ thống giao dịch Upcom xác định theo quy định\ntại điểm a.1 khoản 1 Điều 16 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 (được sửa đổi bởi khoản 1 Điều 19 Thông tư 92/2015/TT-BTC ngày 15/6/2015 của Bộ Tài chính).\nTổng cục Thuế trả lời để Cục Thuế được biết./.\nNơi nhận:\n- Như trên;\n- Phó TCTr Mai Sơn (để b/c);\n- Đơn vị: UBCKNN, CST, PC,\nCục QLGS KTKT (BTC);\n- Vụ: PC, CS (TCT);\n- Website TCT;\n- Lưu: VT, DNNCN (1b).\nTL. TỔNG CỤC TRƯỞNG\nKT. VỤ TRƯỞNG VỤ QLT DNNVV VÀ HKD, CN\nPHÓ VỤ TRƯỞNG\nLý Thị Hoài Hương",
+      "char_count": 995,
       "metadata": {
         "document_id": "DISPATCH_5001_TCT_DNNCN",
         "file_name": "5001-TCT-DNNCN.pdf",
@@ -72,45 +74,10 @@
         "chunk_source_type": "dispatch",
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
-        "paragraph_start": 17,
-        "paragraph_end": 28,
-        "paragraph_count": 12,
-        "overlap_paragraphs": 0
-      }
-    },
-    {
-      "chunk_id": "DISPATCH_5001_TCT_DNNCN_PARAGRAPH_CHUNK_003",
-      "document_id": "DISPATCH_5001_TCT_DNNCN",
-      "chunk_type": "paragraph_group",
-      "text": "a.1) Đối với chứng khoán giao dịch trên Sở Giao dịch chứng khoán: giá trị của chứng khoán được căn cứ vào giá tham chiếu trên Sở giao dịch chứng khoán tại thời điểm đăng ký quyền sở hữu chứng khoán.\na.2) Đối với chứng khoán không thuộc trường hợp trên: giá trị của chứng khoán được căn cứ vào giá trị sổ sách kế toán của công ty phát hành loại chứng khoán đó tại thời điểm lập báo cáo tài chính gần nhất theo quy định của pháp luật về kế toán trước thời điểm đăng ký quyền sở hữu chứng khoán.”\nCăn cứ các quy định nêu trên, cổ phiếu giao dịch trên hệ thống giao dịch Upcom là cổ phiếu giao dịch trên Sở giao dịch chứng khoán. Do đó, giá trị tài sản thừa nhận kế là cổ phiếu giao dịch trên hệ thống giao dịch Upcom xác định theo quy định\ntại điểm a.1 khoản 1 Điều 16 Thông tư số 111/2013/TT-BTC ngày 15/8/2013 (được sửa đổi bởi khoản 1 Điều 19 Thông tư 92/2015/TT-BTC ngày 15/6/2015 của Bộ Tài chính).\nTổng cục Thuế trả lời để Cục Thuế được biết./.\nNơi nhận:\n- Như trên;\n- Phó TCTr Mai Sơn (để b/c);\n- Đơn vị: UBCKNN, CST, PC,\nCục QLGS KTKT (BTC);\n- Vụ: PC, CS (TCT);\n- Website TCT;\n- Lưu: VT, DNNCN (1b).\nTL. TỔNG CỤC TRƯỞNG\nKT. VỤ TRƯỞNG VỤ QLT DNNVV VÀ HKD, CN\nPHÓ VỤ TRƯỞNG\nLý Thị Hoài Hương",
-      "char_count": 1194,
-      "metadata": {
-        "document_id": "DISPATCH_5001_TCT_DNNCN",
-        "file_name": "5001-TCT-DNNCN.pdf",
-        "title": "Công văn 5001/TCT-DNNCN về xác định căn cứ tính thuế TNCN đối với thu nhập từ thừa kế",
-        "document_number": "5001/TCT-DNNCN",
-        "document_type": "Công văn",
-        "issuing_authority": "Tổng cục Thuế",
-        "issue_date": "2023-11-08",
-        "effective_date": "2023-11-08",
-        "expiry_date": "",
-        "status": "effective",
-        "source_type": "official",
-        "source_url": "",
-        "local_path": "data/raw/official_dispatches/5001-TCT-DNNCN.pdf",
-        "download_date": "2026-06-07",
-        "topics": "thuế thu nhập cá nhân",
-        "version": 1,
-        "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được.",
-        "document_name": "Công văn 5001/TCT-DNNCN về xác định căn cứ tính thuế TNCN đối với thu nhập từ thừa kế",
-        "chunk_index": 3,
-        "chunk_source_type": "dispatch",
-        "source_structure": "paragraphs",
-        "parse_status": "NO_ARTICLE_FOUND",
-        "paragraph_start": 29,
+        "paragraph_start": 30,
         "paragraph_end": 47,
-        "paragraph_count": 17,
-        "overlap_paragraphs": 0
+        "paragraph_count": 16,
+        "overlap_paragraphs": 1
       }
     }
   ]

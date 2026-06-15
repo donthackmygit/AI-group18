@@ -17,6 +17,10 @@ class LLMGenerationResult(BaseModel):
     temperature: float
     max_output_tokens: int
     prompt_estimated_tokens: int | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    estimated_cost_usd: float | None = None
     raw_text: str
     parsed_output: dict[str, Any] | None = None
     answer: str | None = None

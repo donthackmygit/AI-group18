@@ -14,6 +14,10 @@ class RerankedCandidate(BaseModel):
     retrieval_rank: int
     rerank_rank: int
     similarity: float
+    semantic_rank: int | None = None
+    keyword_rank: int | None = None
+    keyword_score: float | None = None
+    hybrid_score: float | None = None
     rerank_score: float
     keyword_overlap: float
     topic_score: float

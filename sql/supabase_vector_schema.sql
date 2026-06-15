@@ -99,6 +99,18 @@ create index if not exists rag_chunks_embedding_hnsw_idx
 on rag.chunks
 using hnsw (embedding public.vector_cosine_ops);
 
+create index if not exists rag_chunks_full_text_idx
+on rag.chunks
+using gin (
+    (
+        setweight(to_tsvector('simple', coalesce(document_title, '')), 'A') ||
+        setweight(to_tsvector('simple', coalesce(document_number, '')), 'A') ||
+        setweight(to_tsvector('simple', coalesce(article, '')), 'B') ||
+        setweight(to_tsvector('simple', coalesce(article_title, '')), 'B') ||
+        setweight(to_tsvector('simple', coalesce(content, '')), 'C')
+    )
+);
+
 
 -- =========================================================
 -- 5. Keep the rag schema private from Supabase frontend roles
@@ -167,6 +179,10 @@ create table if not exists rag.query_logs (
     llm_model text,
     llm_prompt_estimated_tokens integer,
     llm_max_output_tokens integer,
+    llm_prompt_tokens integer,
+    llm_completion_tokens integer,
+    llm_total_tokens integer,
+    llm_estimated_cost_usd double precision,
 
     response_time_ms integer,
     answer text,
@@ -388,18 +404,116 @@ create index if not exists documents_metadata_gin_idx
 on rag.documents
 using gin(metadata);
 
+create table if not exists rag.tax_rules (
+    rule_id text primary key,
+    tax_year_from integer not null,
+    tax_year_to integer,
+    effective_from date,
+    effective_to date,
+    source_documents jsonb not null default '[]'::jsonb,
+    rule_payload jsonb not null,
+    is_active boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+
+create index if not exists tax_rules_tax_year_idx
+on rag.tax_rules(tax_year_from, tax_year_to);
+
+create index if not exists tax_rules_active_idx
+on rag.tax_rules(is_active);
+
+insert into rag.tax_rules (
+    rule_id,
+    tax_year_from,
+    tax_year_to,
+    effective_from,
+    effective_to,
+    source_documents,
+    rule_payload
+)
+values
+(
+    'pit_salary_resident_progressive_2020_2025',
+    2020,
+    2025,
+    date '2020-01-01',
+    date '2025-12-31',
+    '["RESOLUTION_954_2020_UBTVQH14","CIRCULAR_111_2013_TT_BTC"]'::jsonb,
+    '{
+      "rule_id": "pit_salary_resident_progressive_2020_2025",
+      "description": "Resident personal income tax for salary/wage income, monthly calculation, family deduction under Resolution 954/2020/UBTVQH14 and progressive brackets from Circular 111/2013/TT-BTC.",
+      "source_documents": ["RESOLUTION_954_2020_UBTVQH14", "CIRCULAR_111_2013_TT_BTC"],
+      "tax_year_from": 2020,
+      "tax_year_to": 2025,
+      "effective_from": "2020-01-01",
+      "effective_to": "2025-12-31",
+      "personal_deduction_monthly": 11000000,
+      "dependent_deduction_monthly": 4400000,
+      "resident_brackets_monthly": [
+        {"up_to": 5000000, "rate": 0.05},
+        {"up_to": 10000000, "rate": 0.1},
+        {"up_to": 18000000, "rate": 0.15},
+        {"up_to": 32000000, "rate": 0.2},
+        {"up_to": 52000000, "rate": 0.25},
+        {"up_to": 80000000, "rate": 0.3},
+        {"up_to": null, "rate": 0.35}
+      ],
+      "non_resident_salary_rate": 0.2,
+      "short_term_withholding_rate": 0.1
+    }'::jsonb
+),
+(
+    'pit_salary_resident_progressive_2026',
+    2026,
+    null,
+    date '2026-01-01',
+    null,
+    '["LAW_109_2025_QH15"]'::jsonb,
+    '{
+      "rule_id": "pit_salary_resident_progressive_2026",
+      "description": "Resident personal income tax for salary/wage income from tax year 2026 under Law 109/2025/QH15.",
+      "source_documents": ["LAW_109_2025_QH15"],
+      "tax_year_from": 2026,
+      "tax_year_to": null,
+      "effective_from": "2026-01-01",
+      "effective_to": null,
+      "personal_deduction_monthly": 15500000,
+      "dependent_deduction_monthly": 6200000,
+      "resident_brackets_monthly": [
+        {"up_to": 10000000, "rate": 0.05},
+        {"up_to": 30000000, "rate": 0.1},
+        {"up_to": 60000000, "rate": 0.2},
+        {"up_to": 100000000, "rate": 0.3},
+        {"up_to": null, "rate": 0.35}
+      ],
+      "non_resident_salary_rate": 0.2,
+      "short_term_withholding_rate": 0.1
+    }'::jsonb
+)
+on conflict (rule_id) do update set
+    tax_year_from = excluded.tax_year_from,
+    tax_year_to = excluded.tax_year_to,
+    effective_from = excluded.effective_from,
+    effective_to = excluded.effective_to,
+    source_documents = excluded.source_documents,
+    rule_payload = excluded.rule_payload,
+    updated_at = now();
+
 alter table rag.query_logs disable row level security;
 alter table rag.query_log_chunks disable row level security;
 alter table rag.ingestion_runs disable row level security;
 alter table rag.ingestion_document_logs disable row level security;
 alter table rag.documents disable row level security;
+alter table rag.tax_rules disable row level security;
 
 revoke all on table
     rag.query_logs,
     rag.query_log_chunks,
     rag.ingestion_runs,
     rag.ingestion_document_logs,
-    rag.documents
+    rag.documents,
+    rag.tax_rules
 from anon, authenticated;
 
 revoke all on all sequences in schema rag from anon, authenticated;
@@ -877,6 +991,14 @@ on rag.documents;
 
 create trigger documents_set_updated_at
 before update on rag.documents
+for each row
+execute function public.set_updated_at();
+
+drop trigger if exists tax_rules_set_updated_at
+on rag.tax_rules;
+
+create trigger tax_rules_set_updated_at
+before update on rag.tax_rules
 for each row
 execute function public.set_updated_at();
 

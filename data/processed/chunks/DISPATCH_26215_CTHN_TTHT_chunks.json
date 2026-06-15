@@ -2,18 +2,20 @@
   "document_id": "DISPATCH_26215_CTHN_TTHT",
   "source_file": "data/processed/structured_documents/DISPATCH_26215_CTHN_TTHT.json",
   "source_parse_status": "NO_ARTICLE_FOUND",
-  "chunked_at": "2026-06-11T09:51:30",
-  "chunk_count": 3,
-  "max_chars_per_chunk": 1800,
+  "chunked_at": "2026-06-14T17:55:15",
+  "chunk_count": 2,
+  "max_tokens_per_chunk": 900,
+  "overlap_tokens": 80,
+  "max_chars_per_chunk": 3600,
   "min_chars_per_chunk": 300,
-  "paragraph_overlap": 0,
+  "paragraph_overlap": 1,
   "chunks": [
     {
       "chunk_id": "DISPATCH_26215_CTHN_TTHT_PARAGRAPH_CHUNK_001",
       "document_id": "DISPATCH_26215_CTHN_TTHT",
       "chunk_type": "paragraph_group",
-      "text": "TỔNG CỤC THUẾ\nCỤC THUẾ TP HÀ NỘI\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 26215/CTHN-TTHT\nV/v chính sách thuế TNCN\nHà Nội, ngày 21 tháng 4 năm 2023\nKính gửi: Văn phòng Đại Diện Tokyo Seiden Co.,Ltd Tại Thành Phố Hà Nội (Địa chỉ: Biệt thự A3, số 73 Vạn Bảo, Phường Ngọc Khánh, Quận Ba Đình, TP Hà Nội; MST: 0109885939)\nTrả lời công văn số 01/2023/CV-CT ngày 22/3/2023 của Văn Phòng Đại Diện TOKYO SEIDEN CO.,LTD Co.,Ltd Tại Thành Phố Hà Nội (sau đây gọi tắt là (“Văn phòng đại diện”) đề nghị hướng dẫn về việc xử lý số thuế TNCN đã nộp thừa khi chuyển đổi loại hình doanh nghiệp, Cục Thuế TP Hà Nội có ý kiến như sau:\n- Căn cứ Luật thương mại số 36/2005/QH11 ngày 14/06/2005 của Quốc hội:\n- Căn cứ Nghị định số 07/2016/NĐ-CP ngày 25/01/2016 của Chính phủ quy định chi tiết Luật thương mại về Văn phòng đại diện, Chi nhánh của thương nhân nước ngoài tại Việt Nam.\n- Căn cứ Luật Doanh nghiệp số 59/2020/QH14 ngày 17/6/2020 của Quốc hội.\n- Căn cứ Luật quản lý thuế số 38/2019/QH14 ngày 13/6/2019 của Quốc hội:\n+ Tại Điều 60 quy định xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa:\n“1. Người nộp thuế có số tiền thuế, tiền chậm nộp, tiền phạt đã nộp lớn hơn số tiền thuế, tiền chậm nộp, tiền phạt phải nộp thì được bù trừ số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa với số tiền thuế, tiền chậm nộp, tiền phạt còn nợ hoặc trừ vào số tiền thuế, tiền chậm nộp, tiền phạt phải nộp của lần nộp thuế tiếp theo hoặc được hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa khi người nộp thuế không còn nợ tiền thuế, tiền chậm nộp, tiền phạt.",
-      "char_count": 1571,
+      "text": "TỔNG CỤC THUẾ\nCỤC THUẾ TP HÀ NỘI\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 26215/CTHN-TTHT\nV/v chính sách thuế TNCN\nHà Nội, ngày 21 tháng 4 năm 2023\nKính gửi: Văn phòng Đại Diện Tokyo Seiden Co.,Ltd Tại Thành Phố Hà Nội (Địa chỉ: Biệt thự A3, số 73 Vạn Bảo, Phường Ngọc Khánh, Quận Ba Đình, TP Hà Nội; MST: 0109885939)\nTrả lời công văn số 01/2023/CV-CT ngày 22/3/2023 của Văn Phòng Đại Diện TOKYO SEIDEN CO.,LTD Co.,Ltd Tại Thành Phố Hà Nội (sau đây gọi tắt là (“Văn phòng đại diện”) đề nghị hướng dẫn về việc xử lý số thuế TNCN đã nộp thừa khi chuyển đổi loại hình doanh nghiệp, Cục Thuế TP Hà Nội có ý kiến như sau:\n- Căn cứ Luật thương mại số 36/2005/QH11 ngày 14/06/2005 của Quốc hội:\n- Căn cứ Nghị định số 07/2016/NĐ-CP ngày 25/01/2016 của Chính phủ quy định chi tiết Luật thương mại về Văn phòng đại diện, Chi nhánh của thương nhân nước ngoài tại Việt Nam.\n- Căn cứ Luật Doanh nghiệp số 59/2020/QH14 ngày 17/6/2020 của Quốc hội.\n- Căn cứ Luật quản lý thuế số 38/2019/QH14 ngày 13/6/2019 của Quốc hội:\n+ Tại Điều 60 quy định xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa:\n“1. Người nộp thuế có số tiền thuế, tiền chậm nộp, tiền phạt đã nộp lớn hơn số tiền thuế, tiền chậm nộp, tiền phạt phải nộp thì được bù trừ số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa với số tiền thuế, tiền chậm nộp, tiền phạt còn nợ hoặc trừ vào số tiền thuế, tiền chậm nộp, tiền phạt phải nộp của lần nộp thuế tiếp theo hoặc được hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa khi người nộp thuế không còn nợ tiền thuế, tiền chậm nộp, tiền phạt.\n2. Trường hợp người nộp thuế yêu cầu hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa thì cơ quan quản lý thuế phải ra quyết định hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa hoặc có văn bản trả lời nêu rõ lý do không hoàn trả trong thời hạn 05 ngày làm việc kể từ ngày nhận được văn bản yêu cầu.\n- Căn cứ Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ quy định chi tiết một số điều của Luật quản lý thuế:\n+ Tại Điều 8 quy định các loại thuế khai theo tháng, khai theo quý, khai theo năm, khai theo từng lần phát sinh nghĩa vụ thuế và khai quyết toán thuế:\n- Căn cứ Thông tư số 105/2020/TT-BTC ngày 03/12/2020 của Bộ tài chính hướng dẫn về đăng ký thuế:\n+ Tại Điều 15 quy định về các nghĩa vụ người nộp thuế phải hoàn thành trước khi chấm dứt hiện lực mã số thuế:\n- Căn cứ Thông tư 80/2021/TT-BTC ngày 29/9/2021 của Bộ Tài chính hướng dẫn thi hành một số điều của Luật Quản lý thuế và Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ quy định chi tiết một số điều của Luật Quản lý thuế.\n+ Tại Điều 25 quy định về xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa:\n+ Tại Điều 40 quy định về hồ sơ hoàn nộp thừa.\nCăn cứ các quy định trên, trường hợp Văn phòng đại diện chấm dứt hoạt động (để thành lập Công ty trách nhiệm hữu hạn) thì thực hiện quyết toán thuế thu nhập cá nhân theo hướng dẫn tại Điều 8 Nghị định số 126/2020/NĐ-CP ngày 19/10/2020. Trường hợp sau quyết toán thuế có số tiền thuế, tiền chậm nộp, tiền phạt đã nộp lớn hơn số tiền thuế, tiền chậm nộp, tiền phạt phải nộp thì Văn phòng đại diện xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa theo hướng dẫn tại Điều 25 Thông tư số 80/2021/TT-BTC ngày 29/9/2021, trường hợp được hoàn trả thì hồ sơ hoàn nộp thừa được thực hiện theo quy định tại Điều 40 Thông tư số 80/2021/TT-BTC.\nĐề nghị Văn phòng đại diện căn cứ vào quy định pháp luật, đối chiếu với tình hình thực tế để thực hiện.",
+      "char_count": 3467,
       "metadata": {
         "document_id": "DISPATCH_26215_CTHN_TTHT",
         "file_name": "26215-CTHN-TTHT.doc",
@@ -38,17 +40,17 @@
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
         "paragraph_start": 1,
-        "paragraph_end": 15,
-        "paragraph_count": 15,
-        "overlap_paragraphs": 0
+        "paragraph_end": 25,
+        "paragraph_count": 25,
+        "overlap_paragraphs": 1
       }
     },
     {
       "chunk_id": "DISPATCH_26215_CTHN_TTHT_PARAGRAPH_CHUNK_002",
       "document_id": "DISPATCH_26215_CTHN_TTHT",
       "chunk_type": "paragraph_group",
-      "text": "2. Trường hợp người nộp thuế yêu cầu hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa thì cơ quan quản lý thuế phải ra quyết định hoàn trả số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa hoặc có văn bản trả lời nêu rõ lý do không hoàn trả trong thời hạn 05 ngày làm việc kể từ ngày nhận được văn bản yêu cầu.\n- Căn cứ Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ quy định chi tiết một số điều của Luật quản lý thuế:\n+ Tại Điều 8 quy định các loại thuế khai theo tháng, khai theo quý, khai theo năm, khai theo từng lần phát sinh nghĩa vụ thuế và khai quyết toán thuế:\n- Căn cứ Thông tư số 105/2020/TT-BTC ngày 03/12/2020 của Bộ tài chính hướng dẫn về đăng ký thuế:\n+ Tại Điều 15 quy định về các nghĩa vụ người nộp thuế phải hoàn thành trước khi chấm dứt hiện lực mã số thuế:\n- Căn cứ Thông tư 80/2021/TT-BTC ngày 29/9/2021 của Bộ Tài chính hướng dẫn thi hành một số điều của Luật Quản lý thuế và Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ quy định chi tiết một số điều của Luật Quản lý thuế.\n+ Tại Điều 25 quy định về xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa:\n+ Tại Điều 40 quy định về hồ sơ hoàn nộp thừa.\nCăn cứ các quy định trên, trường hợp Văn phòng đại diện chấm dứt hoạt động (để thành lập Công ty trách nhiệm hữu hạn) thì thực hiện quyết toán thuế thu nhập cá nhân theo hướng dẫn tại Điều 8 Nghị định số 126/2020/NĐ-CP ngày 19/10/2020. Trường hợp sau quyết toán thuế có số tiền thuế, tiền chậm nộp, tiền phạt đã nộp lớn hơn số tiền thuế, tiền chậm nộp, tiền phạt phải nộp thì Văn phòng đại diện xử lý số tiền thuế, tiền chậm nộp, tiền phạt nộp thừa theo hướng dẫn tại Điều 25 Thông tư số 80/2021/TT-BTC ngày 29/9/2021, trường hợp được hoàn trả thì hồ sơ hoàn nộp thừa được thực hiện theo quy định tại Điều 40 Thông tư số 80/2021/TT-BTC.",
-      "char_count": 1791,
+      "text": "Trường hợp Văn phòng đại diện có vướng mắc về chính sách thuế, Văn phòng đại diện có thể tham khảo các văn bản hướng dẫn của Cục Thuế TP Hà Nội được đăng tải trên website http://hanoi.gdt.gov.vn hoặc liên hệ với Phòng Quản lý hộ kinh doanh, cá nhân và thu khác để được hỗ trợ giải quyết.\nCục Thuế TP Hà Nội trả lời để Văn phòng Đại Diện Tokyo Seiden Co.,Ltd Tại Thành Phố Hà Nội được biết và thực hiện./.\nNơi nhận:\n- Như trên;\n- Phòng NVDTPC;\n- Phòng HKDCN;\n- Website Cục thuế;\n- Lưu: VT,TTHT(2).\nKT. CỤC TRƯỞNG\nPHÓ CỤC TRƯỞNG\nNguyễn Tiến Trường ýﷸì\nDA",
+      "char_count": 552,
       "metadata": {
         "document_id": "DISPATCH_26215_CTHN_TTHT",
         "file_name": "26215-CTHN-TTHT.doc",
@@ -72,45 +74,10 @@
         "chunk_source_type": "dispatch",
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
-        "paragraph_start": 16,
-        "paragraph_end": 24,
-        "paragraph_count": 9,
-        "overlap_paragraphs": 0
-      }
-    },
-    {
-      "chunk_id": "DISPATCH_26215_CTHN_TTHT_PARAGRAPH_CHUNK_003",
-      "document_id": "DISPATCH_26215_CTHN_TTHT",
-      "chunk_type": "paragraph_group",
-      "text": "Đề nghị Văn phòng đại diện căn cứ vào quy định pháp luật, đối chiếu với tình hình thực tế để thực hiện.\nTrường hợp Văn phòng đại diện có vướng mắc về chính sách thuế, Văn phòng đại diện có thể tham khảo các văn bản hướng dẫn của Cục Thuế TP Hà Nội được đăng tải trên website http://hanoi.gdt.gov.vn hoặc liên hệ với Phòng Quản lý hộ kinh doanh, cá nhân và thu khác để được hỗ trợ giải quyết.\nCục Thuế TP Hà Nội trả lời để Văn phòng Đại Diện Tokyo Seiden Co.,Ltd Tại Thành Phố Hà Nội được biết và thực hiện./.\nNơi nhận:\n- Như trên;\n- Phòng NVDTPC;\n- Phòng HKDCN;\n- Website Cục thuế;\n- Lưu: VT,TTHT(2).\nKT. CỤC TRƯỞNG\nPHÓ CỤC TRƯỞNG\nNguyễn Tiến Trường ýﷸì\nDA",
-      "char_count": 656,
-      "metadata": {
-        "document_id": "DISPATCH_26215_CTHN_TTHT",
-        "file_name": "26215-CTHN-TTHT.doc",
-        "title": "Công văn 26215/CTHN-TTHT về chính sách thuế TNCN",
-        "document_number": "26215/CTHN-TTHT",
-        "document_type": "Công văn",
-        "issuing_authority": "Cục Thuế Thành phố Hà Nội",
-        "issue_date": "2023-04-21",
-        "effective_date": "2023-04-21",
-        "expiry_date": "",
-        "status": "effective",
-        "source_type": "official",
-        "source_url": "",
-        "local_path": "data/raw/official_dispatches/26215-CTHN-TTHT.doc",
-        "download_date": "2026-06-07",
-        "topics": "thuế thu nhập cá nhân",
-        "version": 1,
-        "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf.",
-        "document_name": "Công văn 26215/CTHN-TTHT về chính sách thuế TNCN",
-        "chunk_index": 3,
-        "chunk_source_type": "dispatch",
-        "source_structure": "paragraphs",
-        "parse_status": "NO_ARTICLE_FOUND",
-        "paragraph_start": 25,
+        "paragraph_start": 26,
         "paragraph_end": 38,
-        "paragraph_count": 13,
-        "overlap_paragraphs": 0
+        "paragraph_count": 12,
+        "overlap_paragraphs": 1
       }
     }
   ]

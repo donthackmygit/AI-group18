@@ -54,6 +54,15 @@ def route_query(
     if intent == QueryIntent.TAX_CALCULATION:
         if "calculation_request" in classification.missing_fields:
             follow_up_fields = _missing_tax_context_fields(entities)
+            if not follow_up_fields:
+                return QueryRoutingResult(
+                    route=QueryRoute.RAG_WITH_TAX_CALCULATION,
+                    intent=intent,
+                    retrieval_required=True,
+                    tax_calculation_required=True,
+                    llm_required=True,
+                    missing_fields=[],
+                )
             return QueryRoutingResult(
                 route=QueryRoute.CLARIFICATION_REQUIRED,
                 intent=intent,

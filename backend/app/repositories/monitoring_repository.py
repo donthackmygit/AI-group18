@@ -43,6 +43,10 @@ INSERT_QUERY_LOG_SQL = """
         llm_model,
         llm_prompt_estimated_tokens,
         llm_max_output_tokens,
+        llm_prompt_tokens,
+        llm_completion_tokens,
+        llm_total_tokens,
+        llm_estimated_cost_usd,
         response_time_ms,
         answer,
         warnings,
@@ -81,6 +85,10 @@ INSERT_QUERY_LOG_SQL = """
         %(llm_model)s,
         %(llm_prompt_estimated_tokens)s,
         %(llm_max_output_tokens)s,
+        %(llm_prompt_tokens)s,
+        %(llm_completion_tokens)s,
+        %(llm_total_tokens)s,
+        %(llm_estimated_cost_usd)s,
         %(response_time_ms)s,
         %(answer)s,
         %(warnings)s,
@@ -209,6 +217,10 @@ class MonitoringRepository:
             "llm_model": getattr(llm, "model", None),
             "llm_prompt_estimated_tokens": getattr(llm, "prompt_estimated_tokens", None),
             "llm_max_output_tokens": getattr(llm, "max_output_tokens", None),
+            "llm_prompt_tokens": getattr(llm, "prompt_tokens", None),
+            "llm_completion_tokens": getattr(llm, "completion_tokens", None),
+            "llm_total_tokens": getattr(llm, "total_tokens", None),
+            "llm_estimated_cost_usd": getattr(llm, "estimated_cost_usd", None),
             "response_time_ms": response_time_ms,
             "answer": response.answer,
             "warnings": Jsonb(response.warnings),
@@ -228,6 +240,7 @@ class MonitoringRepository:
         }
 
         with get_database_connection(self.settings) as conn:
+            self._ensure_usage_columns(conn)
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(INSERT_QUERY_LOG_SQL, params)
                 row = cur.fetchone()
@@ -313,6 +326,10 @@ class MonitoringRepository:
                 retrieved_count,
                 reranked_count,
                 llm_model,
+                llm_prompt_tokens,
+                llm_completion_tokens,
+                llm_total_tokens,
+                llm_estimated_cost_usd,
                 error_message,
                 warnings
             from rag.query_logs
@@ -323,6 +340,7 @@ class MonitoringRepository:
         """
 
         with get_database_connection(self.settings) as conn:
+            self._ensure_usage_columns(conn)
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(sql, params)
                 rows = cur.fetchall()
@@ -359,7 +377,15 @@ class MonitoringRepository:
                 coalesce(sum(prompt_estimated_tokens), 0)::int
                     as total_prompt_estimated_tokens,
                 coalesce(sum(llm_max_output_tokens), 0)::int
-                    as total_llm_max_output_tokens
+                    as total_llm_max_output_tokens,
+                coalesce(sum(llm_prompt_tokens), 0)::int
+                    as total_llm_prompt_tokens,
+                coalesce(sum(llm_completion_tokens), 0)::int
+                    as total_llm_completion_tokens,
+                coalesce(sum(llm_total_tokens), 0)::int
+                    as total_llm_tokens,
+                coalesce(sum(llm_estimated_cost_usd), 0)::double precision
+                    as total_llm_estimated_cost_usd
             from rag.query_logs
             where created_at >= %(since)s;
         """
@@ -403,6 +429,7 @@ class MonitoringRepository:
         """
 
         with get_database_connection(self.settings) as conn:
+            self._ensure_usage_columns(conn)
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(metrics_sql, {"since": since})
                 metrics = cur.fetchone() or {}
@@ -527,11 +554,30 @@ class MonitoringRepository:
                     "similarity": getattr(candidate, "similarity", None),
                     "rerank_score": getattr(candidate, "rerank_score", None),
                     "content_preview": content_preview,
-                    "metadata": Jsonb({}),
+                    "metadata": Jsonb(
+                        {
+                            "hybrid_score": getattr(candidate, "hybrid_score", None),
+                            "keyword_rank": getattr(candidate, "keyword_rank", None),
+                            "keyword_score": getattr(candidate, "keyword_score", None),
+                            "semantic_rank": getattr(candidate, "semantic_rank", None),
+                        }
+                    ),
                 }
             )
 
         return rows
+
+    @staticmethod
+    def _ensure_usage_columns(conn: Any) -> None:
+        statements = [
+            "alter table rag.query_logs add column if not exists llm_prompt_tokens integer;",
+            "alter table rag.query_logs add column if not exists llm_completion_tokens integer;",
+            "alter table rag.query_logs add column if not exists llm_total_tokens integer;",
+            "alter table rag.query_logs add column if not exists llm_estimated_cost_usd double precision;",
+        ]
+        with conn.cursor() as cur:
+            for statement in statements:
+                cur.execute(statement)
 
     @staticmethod
     def _load_database_dependencies() -> tuple[Any, Any, Any]:

@@ -25,6 +25,15 @@ export function uploadDocument(payload, accessToken, options = {}) {
   });
 }
 
+export function importDocumentUrl(payload, accessToken, options = {}) {
+  return requestJson("/api/v1/admin/documents/import-url", {
+    method: "POST",
+    headers: authHeaders(accessToken),
+    body: JSON.stringify(payload),
+    signal: options.signal,
+  });
+}
+
 export function updateDocument(documentId, payload, accessToken, options = {}) {
   return requestJson(`/api/v1/admin/documents/${encodeURIComponent(documentId)}`, {
     method: "PATCH",

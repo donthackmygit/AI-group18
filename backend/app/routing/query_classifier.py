@@ -52,9 +52,12 @@ CALCULATION_ACTION_TERMS = [
     "tinh giup",
     "hay tinh",
     "uoc tinh",
+    "nop thue",
+    "dong thue",
     "nop bao nhieu",
     "phai nop bao nhieu",
     "bao nhieu thue",
+    "thue tncn bao nhieu",
     "so thue phai nop",
     "thue tncn phai nop",
     "dong thue bao nhieu",
@@ -134,6 +137,8 @@ PERSONAL_DEDUCTION_TERMS = [
 
 RESIDENCY_FACT_TERMS = [
     "toi la nguoi",
+    "ca nhan cu tru",
+    "ca nhan khong cu tru",
     "quoc tich",
     "nguoi nhat",
     "nguoi nuoc ngoai",
@@ -164,6 +169,23 @@ def classify_query(
             intent=QueryIntent.OUT_OF_SCOPE,
             confidence=0.95,
             reason="Detected out-of-scope tax or non-tax topic.",
+        )
+
+    if _is_tax_calculation_request(q):
+        return QueryClassificationResult(
+            intent=QueryIntent.TAX_CALCULATION,
+            confidence=0.88,
+            topic="Tính thuế TNCN",
+            reason="Detected tax calculation request.",
+        )
+
+    if has_conversation_context and _is_tax_input_fact_only(q):
+        return QueryClassificationResult(
+            intent=QueryIntent.TAX_CALCULATION,
+            confidence=0.82,
+            topic="Dữ kiện tính thuế TNCN",
+            missing_fields=["calculation_request"],
+            reason="Detected follow-up tax input facts.",
         )
 
     if _is_residency_question(q):
@@ -204,14 +226,6 @@ def classify_query(
             confidence=0.9,
             topic="Tra cứu nghĩa vụ Thuế TNCN",
             reason="Detected yes/no legal lookup pattern.",
-        )
-
-    if _is_tax_calculation_request(q):
-        return QueryClassificationResult(
-            intent=QueryIntent.TAX_CALCULATION,
-            confidence=0.88,
-            topic="Tính thuế TNCN",
-            reason="Detected tax calculation request.",
         )
 
     if _is_tax_input_fact_only(q):
@@ -273,11 +287,25 @@ def _is_tax_calculation_request(folded_text: str) -> bool:
     has_money = bool(re.search(r"\d+(?:[.,]\d+)?\s*(trieu|tr|dong|vnd)\b", folded_text))
     has_action = _contains_any(folded_text, CALCULATION_ACTION_TERMS)
     has_fact = _contains_any(folded_text, CALCULATION_FACT_TERMS)
+    has_income_or_money = has_money or _contains_any(
+        folded_text,
+        ["luong", "luong gross", "luong net", "thu nhap", "thu nhap chiu thue"],
+    )
 
     if has_action and (has_money or has_fact):
         return True
 
     if has_action and "thue" in folded_text:
+        return True
+
+    if (
+        "bao nhieu" in folded_text
+        and "thue" in folded_text
+        and (has_income_or_money or "nop" in folded_text or "dong" in folded_text)
+    ):
+        return True
+
+    if re.search(r"(nop|dong|phai nop)\s+thue\b.*\bbao nhieu", folded_text):
         return True
 
     return False
@@ -299,8 +327,21 @@ def _is_tax_input_fact_only(folded_text: str) -> bool:
 
 
 def _is_residency_question(folded_text: str) -> bool:
-    return _contains_any(folded_text, RESIDENCY_QUESTION_TERMS) and (
-        "cu tru" in folded_text or "thue" in folded_text
+    question_signals = [
+        "?",
+        "thuoc dien",
+        "xac dinh",
+        "cu tru nao",
+        "duoc tinh ra sao",
+        "tinh ra sao",
+        "hay khong",
+        "la gi",
+        "nhu the nao",
+    ]
+    return (
+        _contains_any(folded_text, RESIDENCY_QUESTION_TERMS)
+        and _contains_any(folded_text, question_signals)
+        and ("cu tru" in folded_text or "thue" in folded_text)
     )
 
 

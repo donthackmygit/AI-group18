@@ -73,7 +73,7 @@ class ChatGatewayService:
         self.reranker = RerankerService()
         self.context_builder = ContextBuilderService()
         self.prompt_builder = PromptBuilderService()
-        self.tax_calculation_service = TaxCalculationService()
+        self.tax_calculation_service = TaxCalculationService(settings)
         self.llm_service = LLMService(settings)
         self.response_validation_service = ResponseValidationService()
         self.response_formatter = ResponseFormatterService(settings)
@@ -142,7 +142,8 @@ class ChatGatewayService:
         _log_stage_duration("query_embedding", stage_started)
 
         stage_started = perf_counter()
-        retrieval_payload = self.retriever.retrieve_semantic(
+        retrieval_payload = self.retriever.retrieve_hybrid(
+            query_text=processed_question.retrieval_query,
             query_embedding=query_embedding.vector,
             top_k=top_k,
             filter_metadata=request.filter_metadata,
@@ -240,6 +241,11 @@ class ChatGatewayService:
                 )
 
             conversation_context = self.conversation_store.get(request.conversation_id)
+            if not conversation_context and request.conversation_id:
+                conversation_context = self.chat_history_repository.fetch_latest_conversation_context(
+                    conversation_id=request.conversation_id,
+                    user_id=authenticated_user.id,
+                )
             processed_question = _apply_tax_input_overrides(
                 process_question(
                     validation_result.normalized_question,

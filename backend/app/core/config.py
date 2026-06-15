@@ -96,6 +96,8 @@ class Settings:
     llm_temperature: float
     llm_max_output_tokens: int
     llm_timeout_ms: int
+    llm_input_cost_per_1k_tokens: float
+    llm_output_cost_per_1k_tokens: float
     gemini_api_key: str
 
     max_question_length: int
@@ -170,6 +172,8 @@ class Settings:
                 1000,
                 _env_int("LLM_TIMEOUT_MS", 30000),
             ),
+            llm_input_cost_per_1k_tokens=_env_float("LLM_INPUT_COST_PER_1K_TOKENS", 0.0),
+            llm_output_cost_per_1k_tokens=_env_float("LLM_OUTPUT_COST_PER_1K_TOKENS", 0.0),
             gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
 
             max_question_length=max(
@@ -223,7 +227,7 @@ class Settings:
 
     @property
     def expose_debug_payload(self) -> bool:
-        return self.app_env != "production" and self.debug_rag_response
+        return self.app_env != "production" or self.debug_rag_response
 
     def database_kwargs(self) -> dict[str, str | int]:
         if not self.database_configured:

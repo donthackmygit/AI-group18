@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from backend.app.core.config import PROJECT_ROOT
+from backend.app.core.config import Settings
 from backend.app.schemas.question_processing import ExtractedEntities
 from backend.app.schemas.tax_calculation import (
     TaxBracketCalculation,
@@ -22,7 +23,8 @@ SHORT_TERM_CONTRACT_TYPES = {"short_term", "under_3_months", "no_contract", "sea
 
 
 class TaxCalculationService:
-    def __init__(self, rules_path: Path = RULES_PATH) -> None:
+    def __init__(self, settings: Settings | None = None, rules_path: Path = RULES_PATH) -> None:
+        self.settings = settings
         self.rules_path = rules_path
         self._rules: list[dict[str, Any]] | None = None
 
@@ -241,12 +243,49 @@ class TaxCalculationService:
 
     def _load_rules(self) -> list[dict[str, Any]]:
         if self._rules is None:
+            db_rules = self._load_rules_from_database()
+            if db_rules:
+                self._rules = db_rules
+                return self._rules
+
             try:
                 payload = json.loads(self.rules_path.read_text(encoding="utf-8"))
             except FileNotFoundError as exc:
                 raise RuntimeError(f"Tax rule file not found: {self.rules_path}") from exc
             self._rules = list(payload.get("rules") or [])
         return self._rules
+
+    def _load_rules_from_database(self) -> list[dict[str, Any]]:
+        if self.settings is None or not self.settings.database_configured:
+            return []
+
+        try:
+            import psycopg
+            from psycopg.rows import dict_row
+        except ModuleNotFoundError:
+            return []
+
+        sql = """
+            select rule_payload
+            from rag.tax_rules
+            where is_active = true
+            order by tax_year_from desc, rule_id;
+        """
+
+        try:
+            with psycopg.connect(**self.settings.database_kwargs()) as conn:
+                with conn.cursor(row_factory=dict_row) as cur:
+                    cur.execute(sql)
+                    rows = cur.fetchall()
+        except Exception:
+            return []
+
+        rules = []
+        for row in rows:
+            payload = row.get("rule_payload")
+            if isinstance(payload, dict):
+                rules.append(payload)
+        return rules
 
 
 def _missing_fields(

@@ -14,6 +14,7 @@ from backend.app.schemas.document_management import (
     DocumentMutationResponse,
     DocumentUpdateRequest,
     DocumentUploadRequest,
+    DocumentUrlImportRequest,
 )
 from backend.app.schemas.monitoring import (
     IngestionLogListResponse,
@@ -296,6 +297,31 @@ def upload_admin_document(
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Document upload is temporarily unavailable.",
+        ) from exc
+
+
+@router.post(
+    "/api/v1/admin/documents/import-url",
+    response_model=DocumentMutationResponse,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_201_CREATED,
+)
+def import_admin_document_url(
+    request: DocumentUrlImportRequest,
+    _: None = Depends(require_monitoring_access),
+) -> DocumentMutationResponse:
+    try:
+        return get_document_management_service().import_url_document(request)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+    except Exception as exc:
+        logger.exception("Document URL import unavailable")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Document URL import is temporarily unavailable.",
         ) from exc
 
 

@@ -121,6 +121,10 @@ class Citation(BaseModel):
     content: str
     metadata: dict[str, Any] = Field(default_factory=dict)
     retrieval_rank: int | None = None
+    semantic_rank: int | None = None
+    keyword_rank: int | None = None
+    keyword_score: float | None = None
+    hybrid_score: float | None = None
     rerank_rank: int | None = None
     rerank_score: float | None = None
 

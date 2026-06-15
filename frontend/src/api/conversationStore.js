@@ -138,6 +138,7 @@ function buildAssistantResponse(row) {
     citations: row.citations || [],
     confidence: metadata.confidence ?? null,
     warning: metadata.warning || null,
+    processed_question: metadata.processed_question || null,
     calculation: metadata.calculation || null,
     classification: metadata.classification || null,
     routing: metadata.routing || null,
@@ -145,7 +146,10 @@ function buildAssistantResponse(row) {
     retrieval: metadata.retrieval || null,
     reranking: metadata.reranking || null,
     tax_calculation: metadata.tax_calculation || null,
+    context: metadata.context || null,
+    llm: metadata.llm || null,
     response_validation: metadata.response_validation || null,
     response_formatter: metadata.response_formatter || null,
+    debug: metadata.debug || null,
   };
 }

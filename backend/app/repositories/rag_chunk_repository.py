@@ -54,6 +54,74 @@ SEARCH_SQL = """
 """
 
 
+KEYWORD_SEARCH_SQL = """
+    with query as (
+        select plainto_tsquery('simple', %(query_text)s) as ts_query
+    ),
+    scored as (
+        select
+            c.chunk_id,
+            c.document_id,
+            c.chunk_type,
+            c.content,
+            c.document_title,
+            c.document_number,
+            c.document_type,
+            c.issuing_authority,
+            c.issue_date,
+            c.effective_date,
+            c.expiry_date,
+            c.status,
+            c.source_url,
+            c.local_path,
+            c.article,
+            c.article_number,
+            c.article_title,
+            c.chapter,
+            c.section,
+            c.paragraph_start,
+            c.paragraph_end,
+            c.metadata,
+            ts_rank_cd(
+                setweight(to_tsvector('simple', coalesce(c.document_title, '')), 'A') ||
+                setweight(to_tsvector('simple', coalesce(c.document_number, '')), 'A') ||
+                setweight(to_tsvector('simple', coalesce(c.article, '')), 'B') ||
+                setweight(to_tsvector('simple', coalesce(c.article_title, '')), 'B') ||
+                setweight(to_tsvector('simple', coalesce(c.content, '')), 'C'),
+                query.ts_query
+            )::double precision as keyword_score
+        from rag.chunks as c
+        cross join query
+        where
+            numnode(query.ts_query) > 0
+            and (
+                setweight(to_tsvector('simple', coalesce(c.document_title, '')), 'A') ||
+                setweight(to_tsvector('simple', coalesce(c.document_number, '')), 'A') ||
+                setweight(to_tsvector('simple', coalesce(c.article, '')), 'B') ||
+                setweight(to_tsvector('simple', coalesce(c.article_title, '')), 'B') ||
+                setweight(to_tsvector('simple', coalesce(c.content, '')), 'C')
+            ) @@ query.ts_query
+            and (%(status)s::text is null or c.status = %(status)s::text)
+            and (
+                %(effective_date)s::date is null
+                or c.effective_date is null
+                or c.effective_date <= %(effective_date)s::date
+            )
+            and (
+                %(effective_date)s::date is null
+                or c.expiry_date is null
+                or c.expiry_date >= %(effective_date)s::date
+            )
+            and (%(filter_metadata)s::jsonb = '{}'::jsonb or c.metadata @> %(filter_metadata)s::jsonb)
+    )
+    select *
+    from scored
+    where keyword_score > 0
+    order by keyword_score desc, chunk_id
+    limit %(top_k)s;
+"""
+
+
 PERSONAL_DEDUCTION_SQL = """
     select
         c.chunk_id,
@@ -191,6 +259,39 @@ class RagChunkRepository:
                     return list(cur.fetchall())
         except Exception as exc:
             raise RuntimeError("Supabase personal deduction lookup failed.") from exc
+
+    def search_keyword(
+        self,
+        query_text: str,
+        top_k: int,
+        filter_metadata: dict[str, Any] | None = None,
+        status: str | None = None,
+        effective_date: date | None = None,
+    ) -> list[dict[str, Any]]:
+        psycopg, dict_row, Jsonb = self._load_database_dependencies()
+
+        params = {
+            "query_text": query_text,
+            "top_k": top_k,
+            "filter_metadata": Jsonb(filter_metadata or {}),
+            "status": status,
+            "effective_date": effective_date,
+        }
+
+        try:
+            conn_context = get_database_connection(self.settings)
+        except Exception as exc:
+            raise RuntimeError(
+                "Could not connect to Supabase PostgreSQL. Check network access and database settings."
+            ) from exc
+
+        try:
+            with conn_context as conn:
+                with conn.cursor(row_factory=dict_row) as cur:
+                    cur.execute(KEYWORD_SEARCH_SQL, params)
+                    return list(cur.fetchall())
+        except Exception as exc:
+            raise RuntimeError("Supabase keyword search failed.") from exc
 
     @staticmethod
     def _load_database_dependencies() -> tuple[Any, Any, Any]:

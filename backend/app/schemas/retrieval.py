@@ -26,6 +26,8 @@ class RetrievalResult(BaseModel):
     requested_top_k: int
     returned_count: int
     filters: RetrievalFilters
+    semantic_count: int | None = None
+    keyword_count: int | None = None
     similarity_min: float | None = None
     similarity_max: float | None = None
     similarity_avg: float | None = None

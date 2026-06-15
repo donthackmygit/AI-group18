@@ -42,7 +42,11 @@ def rewrite_follow_up_question(
     current_entities: ExtractedEntities,
     conversation_context: dict[str, Any] | None,
 ) -> str:
-    if not conversation_context or not _should_rewrite_with_context(current_question, current_entities):
+    if not conversation_context or not _should_rewrite_with_context(
+        current_question,
+        current_entities,
+        conversation_context,
+    ):
         return current_question
 
     if _is_residency_follow_up(current_question):
@@ -69,8 +73,11 @@ def rewrite_follow_up_question(
         period_text = " mỗi năm" if income_period == "yearly" else period_text
         parts.append(f"có thu nhập {_format_vnd(int(income))} đồng{period_text}")
 
-    if insurance:
-        parts.append(f"đóng bảo hiểm {_format_vnd(int(insurance))} đồng")
+    if insurance is not None:
+        if int(insurance) == 0:
+            parts.append("không đóng bảo hiểm bắt buộc")
+        else:
+            parts.append(f"đóng bảo hiểm {_format_vnd(int(insurance))} đồng")
 
     if dependents is not None:
         parts.append(f"có {dependents} người phụ thuộc")
@@ -89,6 +96,7 @@ def rewrite_follow_up_question(
 def _should_rewrite_with_context(
     current_question: str,
     current_entities: ExtractedEntities,
+    conversation_context: dict[str, Any],
 ) -> bool:
     if is_follow_up_question(current_question):
         return True
@@ -112,7 +120,47 @@ def _should_rewrite_with_context(
             current_entities.dependents,
         )
     )
-    return asks_to_calculate and not has_new_numeric_context
+    if asks_to_calculate and not has_new_numeric_context:
+        return True
+
+    last_entities = conversation_context.get("last_entities") or {}
+    last_has_tax_context = any(
+        last_entities.get(key) is not None
+        for key in (
+            "income",
+            "income_period",
+            "insurance",
+            "dependents",
+            "resident_status",
+        )
+    )
+    has_new_tax_context = any(
+        value is not None
+        for value in (
+            current_entities.income,
+            current_entities.income_period,
+            current_entities.insurance,
+            current_entities.dependents,
+            current_entities.resident_status,
+        )
+    )
+    mentions_tax_context = any(
+        term in q
+        for term in (
+            "bao hiem",
+            "bhxh",
+            "bhyt",
+            "bhtn",
+            "ca nhan cu tru",
+            "khong cu tru",
+            "cu tru",
+            "nguoi phu thuoc",
+            "npt",
+            "luong",
+            "thu nhap",
+        )
+    )
+    return last_has_tax_context and has_new_tax_context and mentions_tax_context
 
 
 def _is_residency_follow_up(question: str) -> bool:

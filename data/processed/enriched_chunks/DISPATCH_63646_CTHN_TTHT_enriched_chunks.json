@@ -2,7 +2,7 @@
   "document_id": "DISPATCH_63646_CTHN_TTHT",
   "source_file": "data/processed/chunks/DISPATCH_63646_CTHN_TTHT_chunks.json",
   "registry_file": "data/metadata/document_registry.xlsx",
-  "enriched_at": "2026-06-11T23:13:09",
+  "enriched_at": "2026-06-14T17:55:25",
   "chunk_count": 1,
   "registry_status": "OK",
   "chunks": [
@@ -39,7 +39,7 @@
         "paragraph_start": 1,
         "paragraph_end": 8,
         "paragraph_count": 6,
-        "overlap_paragraphs": 0
+        "overlap_paragraphs": 1
       },
       "embedding_text": "===== PAGE 1 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 2 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information.\n===== PAGE 3 OCR ERROR =====\ntesseract is not installed or it's not in your PATH. See README file for more information."
     }

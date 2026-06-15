@@ -99,6 +99,7 @@ class ResponseValidationService:
 
         issues.extend(_validate_citation_metadata(llm_result.citations, source_map))
         issues.extend(_validate_document_references(answer, source_map))
+        issues.extend(_validate_context_coverage(answer, context, source_map))
         issues.extend(
             _validate_effective_sources(
                 cited_source_ids,
@@ -256,6 +257,59 @@ def _validate_document_references(
     return issues
 
 
+def _validate_context_coverage(
+    answer: str,
+    context: ContextBuildResult | None,
+    source_map: dict[str, ContextSource],
+) -> list[ResponseValidationIssue]:
+    if not answer or not source_map:
+        return []
+
+    context_tokens = _content_tokens(context.context_text if context else "")
+    context_tokens.update(
+        _content_tokens(
+            " ".join(
+                str(getattr(source, "document_title", "") or "")
+                + " "
+                + str(getattr(source, "document_number", "") or "")
+                + " "
+                + str(getattr(source, "article", "") or "")
+                + " "
+                + str(getattr(source, "article_title", "") or "")
+                + " "
+                + str(source.chunk_id or "")
+                for source in source_map.values()
+            )
+        )
+    )
+    issues: list[ResponseValidationIssue] = []
+    for sentence in _split_sentences(answer):
+        if not _is_factual_legal_sentence(sentence):
+            continue
+
+        sentence_tokens = _content_tokens(sentence)
+        if not sentence_tokens:
+            continue
+
+        overlap = len(sentence_tokens & context_tokens) / max(len(sentence_tokens), 1)
+        has_explicit_source = bool(SOURCE_REF_RE.search(sentence))
+        if overlap < 0.18 and not has_explicit_source:
+            issues.append(
+                _issue(
+                    code="POSSIBLE_UNGROUNDED_CLAIM",
+                    severity=ResponseValidationSeverity.WARNING,
+                    message=(
+                        "Answer contains a factual legal or numeric claim that is weakly supported "
+                        "by retrieved source metadata."
+                    ),
+                    field="answer",
+                )
+            )
+            break
+
+    return issues
+
+
 def _validate_effective_sources(
     cited_source_ids: list[str],
     source_map: dict[str, ContextSource],
@@ -407,6 +461,59 @@ def _issue(
 
 def _normalize_text(value: str) -> str:
     return re.sub(r"\s+", " ", value.strip().casefold())
+
+
+def _split_sentences(value: str) -> list[str]:
+    return [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+|\n+", value)
+        if sentence.strip()
+    ]
+
+
+def _is_factual_legal_sentence(value: str) -> bool:
+    normalized = _normalize_text(value)
+    legal_markers = (
+        "thuế",
+        "tncn",
+        "điều",
+        "khoản",
+        "nghị định",
+        "thông tư",
+        "luật",
+        "nghị quyết",
+        "công văn",
+        "giảm trừ",
+        "thuế suất",
+        "phải nộp",
+        "được miễn",
+    )
+    has_number = bool(re.search(r"\d", normalized))
+    return has_number or any(marker in normalized for marker in legal_markers)
+
+
+def _content_tokens(value: str) -> set[str]:
+    normalized = _normalize_text(value)
+    return {
+        token
+        for token in re.findall(r"[\wÀ-ỹ]+", normalized, flags=re.UNICODE)
+        if len(token) >= 3
+        and token
+        not in {
+            "the",
+            "and",
+            "cho",
+            "cua",
+            "của",
+            "với",
+            "này",
+            "một",
+            "các",
+            "được",
+            "phải",
+            "theo",
+        }
+    }
 
 
 def _first_number(value: str) -> str | None:

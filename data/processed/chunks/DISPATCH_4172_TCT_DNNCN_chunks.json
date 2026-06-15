@@ -2,18 +2,20 @@
   "document_id": "DISPATCH_4172_TCT_DNNCN",
   "source_file": "data/processed/structured_documents/DISPATCH_4172_TCT_DNNCN.json",
   "source_parse_status": "NO_ARTICLE_FOUND",
-  "chunked_at": "2026-06-11T09:51:31",
-  "chunk_count": 3,
-  "max_chars_per_chunk": 1800,
+  "chunked_at": "2026-06-14T17:55:15",
+  "chunk_count": 2,
+  "max_tokens_per_chunk": 900,
+  "overlap_tokens": 80,
+  "max_chars_per_chunk": 3600,
   "min_chars_per_chunk": 300,
-  "paragraph_overlap": 0,
+  "paragraph_overlap": 1,
   "chunks": [
     {
       "chunk_id": "DISPATCH_4172_TCT_DNNCN_PARAGRAPH_CHUNK_001",
       "document_id": "DISPATCH_4172_TCT_DNNCN",
       "chunk_type": "paragraph_group",
-      "text": "BỘ TÀI CHÍNH\nTỔNG CỤC THUẾ\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 4172/TCT-DNNCN\nV/v đẩy mạnh xử lý hồ sơ hoàn thuế TNCN.\nHà Nội, ngày 20 tháng 9 năm 2023\nKính gửi:\n- Cục Thuế các tỉnh, thành phố trực thuộc Trung ương;\n- Cục Thuế Doanh nghiệp lớn.\nNgày 31/05/2023, Tổng cục trưởng Tổng cục Thuế đã ban hành Quyết định số 679/QĐ-TCT ban hành kèm theo Quy trình hoàn thuế, trên cơ sở đó, việc xử lý hồ sơ hoàn thuế thu nhập cá nhân (TNCN) cơ bản đã được triển khai thực hiện tại các cơ quan thuế. Cơ quan thuế cũng đã nỗ lực để triển khai xử lý hoàn thuế TNCN kịp thời, đúng quy định. Tuy nhiên vẫn còn tình trạng cơ quan thuế có nhiều cách hiểu khác nhau về nơi nộp hồ sơ quyết toán thuế TNCN của cá nhân dẫn đến lúng túng, không tiếp nhận hồ sơ hoàn thuế TNCN của cá nhân giữa các cơ quan thuế; việc trả lời xác minh, đối chiếu thu nhập của cá nhân chưa được cơ quan thuế chú trọng, từ đó làm ảnh hưởng đến thời gian xử lý hồ sơ hoàn thuế TNCN của cá nhân, gây bức xúc cho người nộp thuế khi thực hiện.\nĐể đảm bảo thực hiện thống nhất theo quy định của pháp luật về quản lý thuế và đẩy mạnh việc xử lý hồ sơ hoàn thuế TNCN của cá nhân được kịp thời và đúng quy định, Tổng cục Thuế đề nghị các Cục Thuế nghiêm túc triển khai thực hiện Quy trình hoàn thuế ban hành kèm theo Quyết định số 679/QĐ-TCT của Tổng cục trưởng Tổng cục Thuế. Trong quá trình triển khai, nếu có phát sinh vướng mắc liên quan đến Quy trình hoàn thuế TNCN, Cục Thuế phản ánh về Tổng cục Thuế (qua Vụ Kê khai và Kế toán thuế, Vụ Quản lý thuế Doanh nghiệp nhỏ và vừa và Hộ kinh doanh, cá nhân) để kịp thời có biện pháp, hướng dẫn giải quyết.\nNgoài ra, Tổng cục Thuế đề nghị các Cục Thuế lưu ý một số nội dung như sau:\n1. Về việc xác định nơi nộp hồ sơ hoàn thuế TNCN của cá nhân",
-      "char_count": 1774,
+      "text": "BỘ TÀI CHÍNH\nTỔNG CỤC THUẾ\nCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM\nĐộc lập - Tự do - Hạnh phúc\nSố: 4172/TCT-DNNCN\nV/v đẩy mạnh xử lý hồ sơ hoàn thuế TNCN.\nHà Nội, ngày 20 tháng 9 năm 2023\nKính gửi:\n- Cục Thuế các tỉnh, thành phố trực thuộc Trung ương;\n- Cục Thuế Doanh nghiệp lớn.\nNgày 31/05/2023, Tổng cục trưởng Tổng cục Thuế đã ban hành Quyết định số 679/QĐ-TCT ban hành kèm theo Quy trình hoàn thuế, trên cơ sở đó, việc xử lý hồ sơ hoàn thuế thu nhập cá nhân (TNCN) cơ bản đã được triển khai thực hiện tại các cơ quan thuế. Cơ quan thuế cũng đã nỗ lực để triển khai xử lý hoàn thuế TNCN kịp thời, đúng quy định. Tuy nhiên vẫn còn tình trạng cơ quan thuế có nhiều cách hiểu khác nhau về nơi nộp hồ sơ quyết toán thuế TNCN của cá nhân dẫn đến lúng túng, không tiếp nhận hồ sơ hoàn thuế TNCN của cá nhân giữa các cơ quan thuế; việc trả lời xác minh, đối chiếu thu nhập của cá nhân chưa được cơ quan thuế chú trọng, từ đó làm ảnh hưởng đến thời gian xử lý hồ sơ hoàn thuế TNCN của cá nhân, gây bức xúc cho người nộp thuế khi thực hiện.\nĐể đảm bảo thực hiện thống nhất theo quy định của pháp luật về quản lý thuế và đẩy mạnh việc xử lý hồ sơ hoàn thuế TNCN của cá nhân được kịp thời và đúng quy định, Tổng cục Thuế đề nghị các Cục Thuế nghiêm túc triển khai thực hiện Quy trình hoàn thuế ban hành kèm theo Quyết định số 679/QĐ-TCT của Tổng cục trưởng Tổng cục Thuế. Trong quá trình triển khai, nếu có phát sinh vướng mắc liên quan đến Quy trình hoàn thuế TNCN, Cục Thuế phản ánh về Tổng cục Thuế (qua Vụ Kê khai và Kế toán thuế, Vụ Quản lý thuế Doanh nghiệp nhỏ và vừa và Hộ kinh doanh, cá nhân) để kịp thời có biện pháp, hướng dẫn giải quyết.\nNgoài ra, Tổng cục Thuế đề nghị các Cục Thuế lưu ý một số nội dung như sau:\n1. Về việc xác định nơi nộp hồ sơ hoàn thuế TNCN của cá nhân\nVề nơi nộp hồ sơ quyết toán thuế TNCN đối với cá nhân trực tiếp quyết toán với cơ quan thuế được quy định tại điểm b.2 khoản 8 Điều 11 Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ, cụ thể:\nTrường hợp cá nhân cư trú có thu nhập tiền lương, tiền công thuộc diện tổ chức chi trả khấu trừ tại nguồn từ hai nơi trở lên thì nộp hồ sơ khai quyết toán thuế như sau:\n+ Cá nhân đã tính giảm trừ gia cảnh cho bản thân tại tổ chức, cá nhân trả thu nhập nào thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế trực tiếp quản lý tổ chức, cá nhân trả thu nhập đó. Trường hợp cá nhân có thay đổi nơi làm việc và tại tổ chức, cá nhân trả thu nhập cuối cùng có tính giảm trừ gia cảnh cho bản thân thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế quản lý tổ chức, cá nhân trả thu nhập cuối cùng. Trường hợp cá nhân có thay đổi nơi làm việc và tại tổ chức, cá nhân trả thu nhập cuối cùng không tính giảm trừ gia cảnh cho bản thân thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế nơi cá nhân cư trú. Trường hợp cá nhân chưa tính giảm trừ gia cảnh cho bản thân ở bất cứ tổ chức, cá nhân trả thu nhập nào thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế nơi cá nhân cư trú.\nVí dụ: Trong năm 2022, ông A làm việc tại TP Hồ Chí Minh có thu nhập tại Công ty X do Chi cục Thuế Quận 1 quản lý. Tháng 01/2023, ông A chuyển ra Hà Nội làm việc tại Công ty Y do Chi cục Thuế quận Hoàn Kiếm quản lý và ông A cư trú tại quận Tây Hồ. Ông A thuộc diện phải trực tiếp quyết toán thuế TNCN năm 2022.\nTrường hợp trong năm 2023, ông A nộp hồ sơ quyết toán thuế TNCN năm 2022 thì nơi nộp hồ sơ quyết toán thuế năm 2022 như sau:\nTại Chi cục Thuế quận Hoàn Kiếm nếu tại thời điểm nộp hồ sơ quyết toán năm 2022, ông A đang tính giảm trừ bản thân tại Công ty Y.",
+      "char_count": 3513,
       "metadata": {
         "document_id": "DISPATCH_4172_TCT_DNNCN",
         "file_name": "4172-TCT-DNNCN.doc",
@@ -38,48 +40,13 @@
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
         "paragraph_start": 1,
-        "paragraph_end": 14,
-        "paragraph_count": 14,
-        "overlap_paragraphs": 0
+        "paragraph_end": 20,
+        "paragraph_count": 20,
+        "overlap_paragraphs": 1
       }
     },
     {
       "chunk_id": "DISPATCH_4172_TCT_DNNCN_PARAGRAPH_CHUNK_002",
-      "document_id": "DISPATCH_4172_TCT_DNNCN",
-      "chunk_type": "paragraph_group",
-      "text": "Về nơi nộp hồ sơ quyết toán thuế TNCN đối với cá nhân trực tiếp quyết toán với cơ quan thuế được quy định tại điểm b.2 khoản 8 Điều 11 Nghị định số 126/2020/NĐ-CP ngày 19/10/2020 của Chính phủ, cụ thể:\nTrường hợp cá nhân cư trú có thu nhập tiền lương, tiền công thuộc diện tổ chức chi trả khấu trừ tại nguồn từ hai nơi trở lên thì nộp hồ sơ khai quyết toán thuế như sau:\n+ Cá nhân đã tính giảm trừ gia cảnh cho bản thân tại tổ chức, cá nhân trả thu nhập nào thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế trực tiếp quản lý tổ chức, cá nhân trả thu nhập đó. Trường hợp cá nhân có thay đổi nơi làm việc và tại tổ chức, cá nhân trả thu nhập cuối cùng có tính giảm trừ gia cảnh cho bản thân thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế quản lý tổ chức, cá nhân trả thu nhập cuối cùng. Trường hợp cá nhân có thay đổi nơi làm việc và tại tổ chức, cá nhân trả thu nhập cuối cùng không tính giảm trừ gia cảnh cho bản thân thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế nơi cá nhân cư trú. Trường hợp cá nhân chưa tính giảm trừ gia cảnh cho bản thân ở bất cứ tổ chức, cá nhân trả thu nhập nào thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế nơi cá nhân cư trú.\nVí dụ: Trong năm 2022, ông A làm việc tại TP Hồ Chí Minh có thu nhập tại Công ty X do Chi cục Thuế Quận 1 quản lý. Tháng 01/2023, ông A chuyển ra Hà Nội làm việc tại Công ty Y do Chi cục Thuế quận Hoàn Kiếm quản lý và ông A cư trú tại quận Tây Hồ. Ông A thuộc diện phải trực tiếp quyết toán thuế TNCN năm 2022.\nTrường hợp trong năm 2023, ông A nộp hồ sơ quyết toán thuế TNCN năm 2022 thì nơi nộp hồ sơ quyết toán thuế năm 2022 như sau:\nTại Chi cục Thuế quận Hoàn Kiếm nếu tại thời điểm nộp hồ sơ quyết toán năm 2022, ông A đang tính giảm trừ bản thân tại Công ty Y.",
-      "char_count": 1738,
-      "metadata": {
-        "document_id": "DISPATCH_4172_TCT_DNNCN",
-        "file_name": "4172-TCT-DNNCN.doc",
-        "title": "Công văn 4172/TCT-DNNCN về đẩy mạnh xử lý hồ sơ hoàn thuế TNCN",
-        "document_number": "4172/TCT-DNNCN",
-        "document_type": "Công văn",
-        "issuing_authority": "Tổng cục Thuế",
-        "issue_date": "2023-09-20",
-        "effective_date": "2023-09-20",
-        "expiry_date": "",
-        "status": "effective",
-        "source_type": "official",
-        "source_url": "",
-        "local_path": "data/raw/official_dispatches/4172-TCT-DNNCN.doc",
-        "download_date": "2026-06-07",
-        "topics": "thuế thu nhập cá nhân",
-        "version": 1,
-        "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf.",
-        "document_name": "Công văn 4172/TCT-DNNCN về đẩy mạnh xử lý hồ sơ hoàn thuế TNCN",
-        "chunk_index": 2,
-        "chunk_source_type": "dispatch",
-        "source_structure": "paragraphs",
-        "parse_status": "NO_ARTICLE_FOUND",
-        "paragraph_start": 15,
-        "paragraph_end": 20,
-        "paragraph_count": 6,
-        "overlap_paragraphs": 0
-      }
-    },
-    {
-      "chunk_id": "DISPATCH_4172_TCT_DNNCN_PARAGRAPH_CHUNK_003",
       "document_id": "DISPATCH_4172_TCT_DNNCN",
       "chunk_type": "paragraph_group",
       "text": "Tại Chi cục Thuế quận Tây Hồ nếu tại thời điểm nộp hồ sơ quyết toán năm 2022, ông A không tính giảm trừ bản thân tại bất kỳ tổ chức trả thu nhập nào.\n+ Trường hợp cá nhân cư trú không ký hợp đồng lao động, hoặc ký hợp đồng lao động dưới 03 tháng, hoặc ký hợp đồng cung cấp dịch vụ có thu nhập tại một nơi hoặc nhiều nơi đã khấu trừ 10% thì nộp hồ sơ khai quyết toán thuế tại cơ quan thuế nơi cá nhân cư trú.\n+ Cá nhân cư trú trong năm có thu nhập từ tiền lương, tiền công tại một nơi hoặc nhiều nơi nhưng tại thời điểm quyết toán không làm việc tại tổ chức, cá nhân trả thu nhập nào thì nơi nộp hồ sơ khai quyết toán thuế là cơ quan thuế nơi cá nhân cư trú.\n2. Về việc phối hợp, xác minh đối chiếu giữa các cơ quan thuế trong xử lý hoàn thuế TNCN\nTrong quá trình xử lý hoàn thuế TNCN có phát sinh trường hợp cơ quan thuế xử lý hoàn thuế cần phải xác minh thu nhập của cá nhân đề nghị hoàn. Cơ quan thuế xử lý hoàn thuế có văn bản đề nghị phối hợp với cơ quan thuế khác để xác minh thu nhập của cá nhân. Tuy nhiên, việc phản hồi đề nghị xác minh nhiều khi còn chậm hoặc không có phản hồi.\nĐể việc giải quyết hoàn thuế TNCN của cá nhân được kịp thời, đúng quy định của pháp luật, Tổng cục Thuế đề nghị khi cơ quan thuế nhận được đề nghị xác minh thu nhập của cơ quan thuế khác thì phải khẩn trương thực hiện xác minh, làm rõ nội dung theo đề nghị và kịp thời có văn bản phản hồi cho cơ quan thuế gửi đề nghị xác minh, tránh việc kéo dài thời gian xử lý hồ sơ hoàn thuế TNCN của cá nhân.\nTổng cục Thuế thông báo để Cục Thuế các tỉnh, thành phố biết và nghiêm túc thực hiện./.\nNơi nhận:\n- Như trên;\n- TCTr Mai Xuân Thành (để b/cáo);\n- Lãnh đạo Tổng cục (để b/cáo);\n- Vụ, đơn vị: KK, PC, CNTT, VP (để p/hợp)\n- Lưu: VT, DNNCN.\nKT. TỔNG CỤC TRƯỞNG\nPHÓ TỔNG CỤC TRƯỞNG\nMai Sơn",
@@ -103,14 +70,14 @@
         "version": 1,
         "notes": "Công văn không phải văn bản quy phạm pháp luật; dùng ngày ban hành làm mốc hiệu lực tham chiếu nếu trích xuất được. PDF dạng scan/ảnh, không trích xuất được toàn văn bằng pypdf.",
         "document_name": "Công văn 4172/TCT-DNNCN về đẩy mạnh xử lý hồ sơ hoàn thuế TNCN",
-        "chunk_index": 3,
+        "chunk_index": 2,
         "chunk_source_type": "dispatch",
         "source_structure": "paragraphs",
         "parse_status": "NO_ARTICLE_FOUND",
         "paragraph_start": 21,
         "paragraph_end": 36,
         "paragraph_count": 16,
-        "overlap_paragraphs": 0
+        "overlap_paragraphs": 1
       }
     }
   ]

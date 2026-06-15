@@ -65,6 +65,11 @@ class DocumentUploadRequest(DocumentMetadataPayload):
     content_base64: str = Field(..., min_length=1)
 
 
+class DocumentUrlImportRequest(DocumentMetadataPayload):
+    source_url: str = Field(..., min_length=1, max_length=1000)
+    file_name: str | None = Field(default=None, max_length=255)
+
+
 class DocumentUpdateRequest(BaseModel):
     document_title: str | None = Field(default=None, min_length=1, max_length=500)
     document_number: str | None = Field(default=None, max_length=120)

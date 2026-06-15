@@ -48,4 +48,6 @@ class ContextBuildResult(BaseModel):
     truncated_count: int
     context_text: str
     sources: list[ContextSource] = Field(default_factory=list)
+    rag_framework: str | None = None
+    framework_document_count: int | None = None
     note: str | None = None

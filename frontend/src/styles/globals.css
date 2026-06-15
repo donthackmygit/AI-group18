@@ -731,6 +731,13 @@ a {
   gap: 8px;
 }
 
+.feedback-label {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .feedback-button--active {
   border-color: var(--color-primary);
   background: var(--color-primary-soft);
@@ -741,6 +748,15 @@ a {
   margin: 6px 0 0;
   color: var(--color-red);
   font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.feedback-help {
+  max-width: 320px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
 }
 
 .chat-input {
@@ -860,33 +876,184 @@ a {
   align-self: flex-start;
 }
 
-.debug-section-list {
-  display: grid;
-  gap: 10px;
-}
-
-.debug-section {
+.debug-empty,
+.debug-card {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: #fbfcfd;
 }
 
-.debug-section summary {
-  cursor: pointer;
-  padding: 12px;
+.debug-empty {
+  padding: 16px;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.debug-card {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.debug-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.debug-card-header h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.debug-pill {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 3px 9px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.debug-pill--ok {
+  border-color: rgba(20, 108, 90, 0.28);
+  background: var(--color-primary-soft);
+  color: var(--color-primary-dark);
+}
+
+.debug-pill--warn {
+  border-color: rgba(176, 93, 32, 0.28);
+  background: #fff6ed;
+  color: #9a4f16;
+}
+
+.debug-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.debug-kv-grid div,
+.debug-text-block,
+.debug-source-row,
+.debug-rank-row,
+.debug-issue-row {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+}
+
+.debug-kv-grid div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+}
+
+.debug-kv-grid dt,
+.debug-text-block span,
+.debug-source-row small,
+.debug-rank-row span {
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.debug-kv-grid dd {
+  margin: 0;
+  overflow-wrap: anywhere;
   font-weight: 800;
 }
 
-.debug-section pre {
-  max-height: 360px;
+.debug-text-block {
+  display: grid;
+  gap: 5px;
+  padding: 11px;
+  line-height: 1.5;
+}
+
+.debug-text-block strong {
+  overflow-wrap: anywhere;
+}
+
+.debug-chip-row,
+.debug-source-list,
+.debug-rank-list,
+.debug-issue-list {
+  display: grid;
+  gap: 8px;
+}
+
+.debug-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.debug-chip {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.debug-source-row,
+.debug-rank-row,
+.debug-issue-row {
+  padding: 10px;
+}
+
+.debug-source-row {
+  display: grid;
+  gap: 3px;
+}
+
+.debug-source-row span,
+.debug-rank-row strong,
+.debug-issue-row strong {
+  overflow-wrap: anywhere;
+  font-weight: 800;
+}
+
+.debug-rank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.debug-rank-row div {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.debug-issue-row {
+  display: grid;
+  gap: 4px;
+  border-color: rgba(176, 93, 32, 0.28);
+  background: #fffaf4;
+}
+
+.debug-issue-row span,
+.debug-note {
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.debug-note {
   margin: 0;
-  overflow: auto;
-  padding: 12px;
-  border-top: 1px solid var(--color-border);
-  color: #26323f;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  white-space: pre-wrap;
+  font-size: 0.84rem;
 }
 
 .feedback {
@@ -1243,6 +1410,7 @@ a {
 
   .calculation-grid,
   .pipeline-grid,
+  .debug-kv-grid,
   .admin-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1277,9 +1445,16 @@ a {
   .chat-input,
   .calculation-grid,
   .pipeline-grid,
+  .debug-kv-grid,
   .admin-summary,
   .admin-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .debug-rank-row,
+  .debug-card-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .admin-page {

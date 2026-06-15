@@ -18,9 +18,12 @@ INPUT_DIR = PROJECT_ROOT / "data" / "processed" / "structured_documents"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "processed" / "chunks"
 LOG_PATH = PROJECT_ROOT / "data" / "processed" / "chunker_log.csv"
 
-MAX_CHARS_PER_CHUNK = 1800
+APPROX_CHARS_PER_TOKEN = 4
+MAX_TOKENS_PER_CHUNK = 900
+OVERLAP_TOKENS = 80
+MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_CHUNK * APPROX_CHARS_PER_TOKEN
 MIN_CHARS_PER_CHUNK = 300
-PARAGRAPH_OVERLAP = 0
+PARAGRAPH_OVERLAP = 1
 
 DOCUMENT_METADATA_FIELDS = [
     "document_id",
@@ -132,7 +135,7 @@ def split_long_paragraph(paragraph: str, max_chars: int) -> list[str]:
     return chunks
 
 
-def split_plain_text(text: str, max_chars: int) -> list[str]:
+def split_plain_text(text: str, max_chars: int, overlap_tokens: int = OVERLAP_TOKENS) -> list[str]:
     text = normalize_text(text)
     if not text:
         return []
@@ -164,7 +167,7 @@ def split_plain_text(text: str, max_chars: int) -> list[str]:
             current.append(paragraph)
 
     flush_current()
-    return chunks
+    return add_token_overlap(chunks, max_chars=max_chars, overlap_tokens=overlap_tokens)
 
 
 def split_text_with_prefix(
@@ -187,6 +190,35 @@ def split_text_with_prefix(
 
     body_parts = split_plain_text(body, body_budget)
     return [prefixed_text(prefix_lines, body_part) for body_part in body_parts]
+
+
+def add_token_overlap(parts: list[str], max_chars: int, overlap_tokens: int) -> list[str]:
+    if overlap_tokens <= 0 or len(parts) <= 1:
+        return parts
+
+    overlapped = [parts[0]]
+    for index, part in enumerate(parts[1:], start=1):
+        tail = token_tail(parts[index - 1], overlap_tokens)
+        while tail:
+            candidate = normalize_text(f"{tail}\n{part}")
+            if len(candidate) <= max_chars:
+                overlapped.append(candidate)
+                break
+            words = tail.split()
+            if len(words) <= 8:
+                tail = ""
+            else:
+                tail = " ".join(words[len(words) // 2 :])
+        else:
+            overlapped.append(part)
+    return overlapped
+
+
+def token_tail(text: str, token_count: int) -> str:
+    words = normalize_text(text).split()
+    if len(words) <= token_count:
+        return " ".join(words)
+    return " ".join(words[-token_count:])
 
 
 def article_heading(article: dict[str, Any]) -> str:
@@ -835,6 +867,8 @@ def process_file(input_file: Path, max_chars: int) -> tuple[dict[str, Any], dict
         "source_parse_status": doc.get("parse_status", ""),
         "chunked_at": datetime.now().isoformat(timespec="seconds"),
         "chunk_count": len(chunks),
+        "max_tokens_per_chunk": MAX_TOKENS_PER_CHUNK,
+        "overlap_tokens": OVERLAP_TOKENS,
         "max_chars_per_chunk": max_chars,
         "min_chars_per_chunk": MIN_CHARS_PER_CHUNK,
         "paragraph_overlap": PARAGRAPH_OVERLAP,

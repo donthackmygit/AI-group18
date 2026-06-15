@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   expireDocument,
   getDocument,
+  importDocumentUrl,
   ingestDocument,
   listAllDocumentChunks,
   listDocuments,
@@ -164,6 +165,37 @@ export default function DocumentAdminPage({ accessToken }) {
       await refreshDocuments();
     } catch (err) {
       setError(err.message || "Không tải lên được tài liệu.");
+    } finally {
+      setIsWorking(false);
+    }
+  };
+
+  const handleImportUrl = async () => {
+    if (!accessToken) {
+      setError("Chưa có phiên đăng nhập để dùng API quản trị.");
+      return;
+    }
+    if (!form.source_url.trim()) {
+      setError("Nhập URL nguồn trước khi import.");
+      return;
+    }
+
+    setIsWorking(true);
+    setError(null);
+    setNotice(null);
+    try {
+      const payload = compactPayload({
+        ...form,
+        file_name: form.document_id ? `${form.document_id}.html` : undefined,
+      });
+      const response = await importDocumentUrl(payload, accessToken);
+      setSelectedDocument(response.document);
+      setForm(formFromDocument(response.document));
+      setChunks([]);
+      setNotice("Đã import URL và trích xuất preview.");
+      await refreshDocuments();
+    } catch (err) {
+      setError(err.message || "Không import được URL tài liệu.");
     } finally {
       setIsWorking(false);
     }
@@ -389,6 +421,14 @@ export default function DocumentAdminPage({ accessToken }) {
           <div className="admin-actions">
             <button className="primary-button" type="submit" disabled={isWorking || !accessToken}>
               Tải lên
+            </button>
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={handleImportUrl}
+              disabled={isWorking || !accessToken || !form.source_url.trim()}
+            >
+              Import URL
             </button>
             <button
               className="secondary-button"

@@ -45,7 +45,7 @@ class LLMService:
                 "Prompt Builder did not provide a user message for the LLM."
             )
 
-        response_text = self._generate_with_gemini(
+        response_text, usage = self._generate_with_gemini(
             system_instruction=prompt.system_instruction,
             user_content=user_message.content,
         )
@@ -64,6 +64,14 @@ class LLMService:
             temperature=self.settings.llm_temperature,
             max_output_tokens=self.settings.llm_max_output_tokens,
             prompt_estimated_tokens=prompt.estimated_tokens,
+            prompt_tokens=usage.get("prompt_tokens"),
+            completion_tokens=usage.get("completion_tokens"),
+            total_tokens=usage.get("total_tokens"),
+            estimated_cost_usd=_estimate_cost_usd(
+                usage=usage,
+                input_cost_per_1k=self.settings.llm_input_cost_per_1k_tokens,
+                output_cost_per_1k=self.settings.llm_output_cost_per_1k_tokens,
+            ),
             raw_text=response_text,
             parsed_output=parsed_output,
             answer=answer,
@@ -88,14 +96,15 @@ class LLMService:
             ]
         )
 
-        return self._generate_with_gemini(
+        response_text, _usage = self._generate_with_gemini(
             system_instruction=(
                 "Bạn là trợ lý giải đáp Thuế Thu nhập cá nhân tại Việt Nam."
             ),
             user_content=prompt_text,
         )
+        return response_text
 
-    def _generate_with_gemini(self, system_instruction: str, user_content: str) -> str:
+    def _generate_with_gemini(self, system_instruction: str, user_content: str) -> tuple[str, dict[str, int | None]]:
         genai, types = _load_gemini_dependencies()
         client = self._get_client(genai, types)
 
@@ -127,7 +136,7 @@ class LLMService:
                 detail or "LLM did not return text content."
             )
 
-        return response_text.strip()
+        return response_text.strip(), _extract_usage_metadata(response)
 
     def _get_client(self, genai: Any, types: Any) -> Any:
         if self._client is not None:
@@ -283,3 +292,70 @@ def _gemini_empty_response_detail(response: Any) -> str | None:
         return None
 
     return "LLM did not return text content. " + " | ".join(details)
+
+
+def _extract_usage_metadata(response: Any) -> dict[str, int | None]:
+    usage = getattr(response, "usage_metadata", None)
+    if usage is None:
+        return {
+            "prompt_tokens": None,
+            "completion_tokens": None,
+            "total_tokens": None,
+        }
+
+    prompt_tokens = _usage_int(
+        usage,
+        "prompt_token_count",
+        "prompt_tokens",
+        "input_token_count",
+    )
+    completion_tokens = _usage_int(
+        usage,
+        "candidates_token_count",
+        "completion_tokens",
+        "output_token_count",
+    )
+    total_tokens = _usage_int(
+        usage,
+        "total_token_count",
+        "total_tokens",
+    )
+    if total_tokens is None and (prompt_tokens is not None or completion_tokens is not None):
+        total_tokens = (prompt_tokens or 0) + (completion_tokens or 0)
+
+    return {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": completion_tokens,
+        "total_tokens": total_tokens,
+    }
+
+
+def _usage_int(usage: Any, *names: str) -> int | None:
+    for name in names:
+        value = getattr(usage, name, None)
+        if value is None and isinstance(usage, dict):
+            value = usage.get(name)
+        if value is None:
+            continue
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _estimate_cost_usd(
+    *,
+    usage: dict[str, int | None],
+    input_cost_per_1k: float,
+    output_cost_per_1k: float,
+) -> float | None:
+    prompt_tokens = usage.get("prompt_tokens")
+    completion_tokens = usage.get("completion_tokens")
+    if prompt_tokens is None and completion_tokens is None:
+        return None
+
+    cost = ((prompt_tokens or 0) / 1000 * input_cost_per_1k) + (
+        (completion_tokens or 0) / 1000 * output_cost_per_1k
+    )
+    return round(cost, 8)

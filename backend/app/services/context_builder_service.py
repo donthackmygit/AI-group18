@@ -12,6 +12,7 @@ from backend.app.schemas.context import (
     ContextSource,
 )
 from backend.app.schemas.rag import Citation
+from backend.app.services.rag_framework_adapter import build_langchain_documents
 
 
 MIN_TRUNCATED_BLOCK_TOKENS = 80
@@ -98,6 +99,7 @@ class ContextBuilderService:
 
         skipped_by_token_limit_count = len(sorted_citations) - len(included_citations)
 
+        rag_framework, framework_documents = build_langchain_documents(included_citations)
         return ContextPayload(
             citations=included_citations,
             result=ContextBuildResult(
@@ -113,9 +115,12 @@ class ContextBuilderService:
                 truncated_count=truncated_count,
                 context_text="\n\n".join(context_blocks),
                 sources=context_sources,
+                rag_framework=rag_framework,
+                framework_document_count=len(framework_documents),
                 note=(
                     "Context is assembled from re-ranked citations, de-duplicated by chunk/content, "
-                    "ordered by legal metadata, and capped with an approximate token estimator."
+                    "ordered by legal metadata, exposed through an optional LangChain Document adapter, "
+                    "and capped with an approximate token estimator."
                 ),
             ),
         )

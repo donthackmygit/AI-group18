@@ -2,11 +2,13 @@
   "document_id": "DISPATCH_9208_CT_TTHT",
   "source_file": "data/processed/structured_documents/DISPATCH_9208_CT_TTHT.json",
   "source_parse_status": "NO_ARTICLE_FOUND",
-  "chunked_at": "2026-06-11T09:51:31",
+  "chunked_at": "2026-06-14T17:55:15",
   "chunk_count": 1,
-  "max_chars_per_chunk": 1800,
+  "max_tokens_per_chunk": 900,
+  "overlap_tokens": 80,
+  "max_chars_per_chunk": 3600,
   "min_chars_per_chunk": 300,
-  "paragraph_overlap": 0,
+  "paragraph_overlap": 1,
   "chunks": [
     {
       "chunk_id": "DISPATCH_9208_CT_TTHT_PARAGRAPH_CHUNK_001",
@@ -40,7 +42,7 @@
         "paragraph_start": 1,
         "paragraph_end": 26,
         "paragraph_count": 25,
-        "overlap_paragraphs": 0
+        "overlap_paragraphs": 1
       }
     }
   ]

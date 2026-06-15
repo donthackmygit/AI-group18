@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from backend.app.core.config import PROJECT_ROOT, Settings
 from backend.app.repositories.document_management_repository import (
@@ -22,6 +23,7 @@ from backend.app.schemas.document_management import (
     DocumentMutationResponse,
     DocumentUpdateRequest,
     DocumentUploadRequest,
+    DocumentUrlImportRequest,
 )
 from backend.app.services.embedding_service import EmbeddingService
 
@@ -33,7 +35,7 @@ CLEANED_TEXT_DIR = UPLOAD_ROOT / "cleaned"
 
 MAX_UPLOAD_BYTES = 80 * 1024 * 1024
 PREVIEW_MAX_CHARS = 6000
-MAX_CHARS_PER_CHUNK = 1800
+MAX_CHARS_PER_CHUNK = 3600
 
 SUPPORTED_UPLOAD_SUFFIXES = {
     ".pdf",
@@ -163,6 +165,92 @@ class DocumentManagementService:
             page_count=extracted.page_count,
             warning=extracted.warning or None,
             raw_log={"extractor": extracted.extractor},
+        )
+
+        return DocumentMutationResponse(
+            document=DocumentDetail(**_normalize_document_row(document))
+        )
+
+    def import_url_document(self, request: DocumentUrlImportRequest) -> DocumentMutationResponse:
+        source_url = str(request.source_url).strip()
+        if not source_url.startswith(("https://", "http://")):
+            raise ValueError("source_url must start with http:// or https://.")
+
+        document_id = _choose_document_id(
+            explicit_id=request.document_id,
+            document_number=request.document_number,
+            file_name=request.file_name or _file_name_from_url(source_url),
+        )
+        file_name = Path(request.file_name or _file_name_from_url(source_url)).name
+        if not file_name:
+            file_name = f"{document_id}.url"
+
+        _ensure_storage_dirs()
+        pointer_path = RAW_UPLOAD_DIR / f"{document_id}.url.txt"
+        pointer_path.write_text(source_url, encoding="utf-8")
+
+        metadata = _metadata_from_payload(
+            payload=request,
+            document_id=document_id,
+            file_name=file_name,
+            local_path=_project_relative(pointer_path),
+        )
+        metadata["source_type"] = "url"
+
+        extracted = _extract_and_clean_url(
+            document_id=document_id,
+            source_url=source_url,
+        )
+        metadata.update(
+            {
+                "extractor": extracted.extractor,
+                "page_count": extracted.page_count,
+                "extracted_text_path": _project_relative(extracted.extracted_path),
+                "cleaned_text_path": _project_relative(extracted.cleaned_path),
+                "import_warning": extracted.warning,
+            }
+        )
+
+        document = self.repository.upsert_document(
+            {
+                "document_id": document_id,
+                "file_name": file_name,
+                "document_title": request.document_title,
+                "document_number": request.document_number,
+                "document_type": request.document_type,
+                "issuing_authority": request.issuing_authority,
+                "issue_date": request.issue_date,
+                "effective_date": request.effective_date,
+                "expiry_date": request.expiry_date,
+                "status": request.status,
+                "source_url": source_url,
+                "local_path": _project_relative(pointer_path),
+                "version": request.version,
+                "topics": request.topics,
+                "notes": request.notes,
+                "extractor": extracted.extractor,
+                "page_count": extracted.page_count,
+                "extracted_char_count": len(extracted.cleaned_text),
+                "extracted_preview": _preview_text(extracted.cleaned_text),
+                "ingestion_status": "extracted",
+                "ingestion_error": None,
+                "search_enabled": False,
+                "chunk_count": 0,
+                "metadata": metadata,
+            }
+        )
+
+        self.repository.insert_ingestion_log(
+            run_id=None,
+            document_id=document_id,
+            step="admin_url_import_preview",
+            status="success" if extracted.cleaned_text.strip() else "empty",
+            input_path=source_url,
+            output_path=_project_relative(extracted.cleaned_path),
+            char_count=len(extracted.cleaned_text),
+            page_count=extracted.page_count,
+            warning=extracted.warning or None,
+            raw_log={"extractor": extracted.extractor, "source_url": source_url},
         )
 
         return DocumentMutationResponse(
@@ -415,10 +503,17 @@ class DocumentManagementService:
         if source_path is None or not source_path.exists():
             raise FileNotFoundError("Document source file is missing.")
 
-        extracted = _extract_and_clean(
-            document_id=document["document_id"],
-            source_path=source_path,
-        )
+        source_url = document.get("source_url") or metadata.get("source_url")
+        if metadata.get("source_type") == "url" and source_url:
+            extracted = _extract_and_clean_url(
+                document_id=document["document_id"],
+                source_url=str(source_url),
+            )
+        else:
+            extracted = _extract_and_clean(
+                document_id=document["document_id"],
+                source_path=source_path,
+            )
         metadata.update(
             {
                 "extracted_text_path": _project_relative(extracted.extracted_path),
@@ -511,6 +606,34 @@ def _extract_and_clean(*, document_id: str, source_path: Path) -> ExtractedText:
     )
 
 
+def _extract_and_clean_url(*, document_id: str, source_url: str) -> ExtractedText:
+    _ensure_storage_dirs()
+    raw_text_path = EXTRACTED_TEXT_DIR / f"{document_id}.txt"
+    cleaned_text_path = CLEANED_TEXT_DIR / f"{document_id}.txt"
+
+    from scripts.document_loader import LoaderOptions, load_document
+    from scripts.text_cleaner import clean_text
+
+    extracted = load_document(
+        source_url,
+        LoaderOptions(ocr_enabled=True),
+    )
+    raw_text = extracted.text
+    cleaned_text = clean_text(raw_text)
+    raw_text_path.write_text(raw_text, encoding="utf-8")
+    cleaned_text_path.write_text(cleaned_text, encoding="utf-8")
+
+    return ExtractedText(
+        raw_text=raw_text,
+        cleaned_text=cleaned_text,
+        extractor=extracted.extractor,
+        page_count=extracted.page_count,
+        warning=extracted.warning,
+        extracted_path=raw_text_path,
+        cleaned_path=cleaned_text_path,
+    )
+
+
 def _metadata_from_payload(
     *,
     payload: DocumentUploadRequest,
@@ -532,6 +655,15 @@ def _metadata_from_payload(
         }
     )
     return metadata
+
+
+def _file_name_from_url(source_url: str) -> str:
+    parsed = urlparse(source_url)
+    path_name = Path(parsed.path).name
+    if path_name:
+        return path_name[:255]
+    host = parsed.netloc or "url_document"
+    return f"{_safe_identifier(host) or 'url_document'}.html"
 
 
 def _metadata_patch_from_updates(updates: dict[str, Any]) -> dict[str, Any]:

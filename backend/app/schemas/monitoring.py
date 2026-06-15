@@ -25,6 +25,10 @@ class QueryLogListItem(BaseModel):
     reranked_count: int | None = None
 
     llm_model: str | None = None
+    llm_prompt_tokens: int | None = None
+    llm_completion_tokens: int | None = None
+    llm_total_tokens: int | None = None
+    llm_estimated_cost_usd: float | None = None
     error_message: str | None = None
     warnings: list[str] = Field(default_factory=list)
 
@@ -72,6 +76,10 @@ class MonitoringDashboardResponse(BaseModel):
 
     total_prompt_estimated_tokens: int = 0
     total_llm_max_output_tokens: int = 0
+    total_llm_prompt_tokens: int = 0
+    total_llm_completion_tokens: int = 0
+    total_llm_tokens: int = 0
+    total_llm_estimated_cost_usd: float = 0.0
 
     feedback: FeedbackSummary = Field(default_factory=FeedbackSummary)
     top_documents: list[TopDocumentItem] = Field(default_factory=list)

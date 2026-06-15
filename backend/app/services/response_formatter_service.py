@@ -90,6 +90,19 @@ class ResponseFormatterService:
             include_advisory=mode in {"llm", "llm_fallback"},
         )
 
+        formatter_result = ResponseFormatResult(
+            applied=True,
+            format_version=FORMAT_VERSION,
+            citation_count=len(formatted_citations),
+            calculation_included=formatted_calculation is not None,
+            confidence=formatted_confidence,
+            warning_count=len(formatted_warnings),
+            note=(
+                "Response Formatter normalizes the final backend response into answer, "
+                "conversation_id, citations, calculation, confidence, and warning fields."
+            ),
+        )
+
         return ChatResponse(
             answer=_format_answer(answer),
             conversation_id=conversation_id,
@@ -110,24 +123,21 @@ class ResponseFormatterService:
             prompt=prompt,
             llm=llm,
             response_validation=response_validation,
-            response_formatter=ResponseFormatResult(
-                applied=True,
-                format_version=FORMAT_VERSION,
-                citation_count=len(formatted_citations),
-                calculation_included=formatted_calculation is not None,
-                confidence=formatted_confidence,
-                warning_count=len(formatted_warnings),
-                note=(
-                    "Response Formatter normalizes the final backend response into answer, "
-                    "conversation_id, citations, calculation, confidence, and warning fields."
-                ),
-            ),
+            response_formatter=formatter_result,
             debug=(
-                {
-                    "response_validation": response_validation.model_dump(mode="json")
-                    if response_validation
-                    else None
-                }
+                _build_debug_payload(
+                    processed_question=processed_question,
+                    classification=classification,
+                    routing=routing,
+                    query_embedding=query_embedding,
+                    retrieval=retrieval,
+                    reranking=reranking,
+                    calculation=calculation,
+                    context=context,
+                    llm=llm,
+                    response_validation=response_validation,
+                    response_formatter=formatter_result,
+                )
                 if self.settings.expose_debug_payload
                 else None
             ),
@@ -146,6 +156,72 @@ def _format_answer(answer: str | None) -> str:
     cleaned = _clean_user_facing_text(parsed_answer or normalized)
 
     return cleaned or EMPTY_ANSWER
+
+
+def _build_debug_payload(
+    *,
+    processed_question: ProcessedQuestion | None,
+    classification: QueryClassificationResult | None,
+    routing: QueryRoutingResult | None,
+    query_embedding: QueryEmbeddingResult | None,
+    retrieval: RetrievalResult | None,
+    reranking: RerankingResult | None,
+    calculation: TaxCalculationResult | None,
+    context: ContextBuildResult | None,
+    llm: LLMGenerationResult | None,
+    response_validation: ResponseValidationResult | None,
+    response_formatter: ResponseFormatResult | None,
+) -> dict[str, Any]:
+    return {
+        "processed_question": _dump_model(processed_question),
+        "classification": _dump_model(classification),
+        "routing": _dump_model(routing),
+        "query_embedding": _safe_query_embedding_debug(query_embedding),
+        "retrieval": _dump_model(retrieval),
+        "reranking": _dump_model(reranking),
+        "tax_calculation": _dump_model(calculation),
+        "context": _safe_context_debug(context),
+        "llm": _safe_llm_debug(llm),
+        "response_validation": _dump_model(response_validation),
+        "response_formatter": _dump_model(response_formatter),
+    }
+
+
+def _dump_model(value: Any) -> Any:
+    if value is None:
+        return None
+    if hasattr(value, "model_dump"):
+        return value.model_dump(mode="json")
+    return value
+
+
+def _safe_query_embedding_debug(value: QueryEmbeddingResult | None) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    payload = value.model_dump(mode="json")
+    payload.pop("vector_preview", None)
+    return payload
+
+
+def _safe_context_debug(value: ContextBuildResult | None) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    payload = value.model_dump(mode="json", exclude={"context_text"})
+    payload["context_preview"] = (
+        value.context_text[:360].rsplit(" ", 1)[0].strip() + "..."
+        if len(value.context_text) > 360
+        else value.context_text
+    )
+    return payload
+
+
+def _safe_llm_debug(value: LLMGenerationResult | None) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    return value.model_dump(
+        mode="json",
+        exclude={"raw_text", "parsed_output", "answer", "citations"},
+    )
 
 
 def _extract_answer_from_json(value: str) -> str | None:
